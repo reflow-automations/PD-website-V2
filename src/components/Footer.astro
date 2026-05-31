@@ -82,7 +82,7 @@ const socials = [
     </div>
 
     <div class="ft__bottom">
-      <p>© {year} {SITE.name} · Sinds {SITE.foundedYear}</p>
+      <p>© <span data-secret>{year}</span> {SITE.name} · Sinds {SITE.foundedYear}</p>
       <p class="ft__bottom-links">
         <a href="/privacyverklaring/">Privacy</a>
         <a href="/cookiebeleid/">Cookies</a>
@@ -119,6 +119,8 @@ const socials = [
   .ft__bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line-dark); color: var(--on-dark-faint); font-size: 0.82rem; }
   .ft__bottom-links { display: flex; gap: 1.2rem; }
   .ft__bottom-links a:hover { color: #fff; }
+  /* Geheime admin-trigger: ziet eruit als gewone tekst, geen aanwijzing. */
+  [data-secret] { cursor: default; user-select: none; -webkit-user-select: none; }
 
   @media (min-width: 720px) { .ft__cols { grid-template-columns: repeat(4, 1fr); } }
   @media (min-width: 1000px) {
@@ -126,3 +128,17 @@ const socials = [
     .ft__cols { gap: 2.5rem; }
   }
 </style>
+
+<script>
+  // Geheime toegang voor de eigenaar: klik 5x snel op het jaartal -> /admin.
+  // Onzichtbaar voor bezoekers; doet niets zonder de 5 kliks.
+  const secret = document.querySelector('[data-secret]');
+  let clicks = 0;
+  let timer: ReturnType<typeof setTimeout>;
+  secret?.addEventListener('click', () => {
+    clicks++;
+    clearTimeout(timer);
+    timer = setTimeout(() => { clicks = 0; }, 1500);
+    if (clicks >= 5) { clicks = 0; window.location.href = '/admin/'; }
+  });
+</script>

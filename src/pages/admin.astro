@@ -15,6 +15,10 @@ import { locations } from '../data/locations';
           <span>Wachtwoord</span>
           <input type="password" name="password" autocomplete="current-password" required />
         </label>
+        <label class="remember">
+          <input type="checkbox" data-remember />
+          <span>Onthoud op dit apparaat <em>(vult het wachtwoord voortaan automatisch in)</em></span>
+        </label>
 
         <div class="field">
           <span>Bestanden <em>(foto's en video's, meerdere tegelijk)</em></span>
@@ -68,6 +72,9 @@ import { locations } from '../data/locations';
     padding: 0.8rem 0.9rem; color: #fff; font-size: 0.95rem; transition: border-color 0.2s; width: 100%;
   }
   .field input:focus, .field select:focus { outline: none; border-color: var(--red); }
+  .remember { display: flex; align-items: center; gap: 0.55rem; margin-top: -0.6rem; font-size: 0.85rem; color: var(--on-dark-soft); cursor: pointer; }
+  .remember input { width: 1.05rem; height: 1.05rem; accent-color: var(--red); flex: none; }
+  .remember em { color: var(--on-dark-faint); font-style: normal; }
 
   .drop {
     display: flex; flex-direction: column; align-items: center; gap: 0.4rem; text-align: center;
@@ -106,7 +113,15 @@ import { locations } from '../data/locations';
   const statusEl = document.querySelector<HTMLElement>('[data-status]')!;
   const listEl = document.querySelector<HTMLUListElement>('[data-list]')!;
   const submitBtn = document.querySelector<HTMLButtonElement>('[data-submit]')!;
+  const rememberBox = document.querySelector<HTMLInputElement>('[data-remember]')!;
   let files: File[] = [];
+
+  // Onthoud-wachtwoord (opt-in, alleen op dit apparaat, in localStorage).
+  const PW_KEY = 'pd_admin_pw';
+  try {
+    const saved = localStorage.getItem(PW_KEY);
+    if (saved) { pwInput.value = saved; rememberBox.checked = true; }
+  } catch (e) { /* localStorage geblokkeerd */ }
 
   function setStatus(msg: string, cls = '') {
     statusEl.textContent = msg;
@@ -196,6 +211,11 @@ import { locations } from '../data/locations';
       if (r.status === 500) { setStatus('Server niet geconfigureerd: zet de env-vars in Vercel.', 'is-err'); submitBtn.disabled = false; return; }
       if (!r.ok) throw new Error('sign ' + r.status);
       sig = await r.json();
+      // Wachtwoord klopt: onthouden of juist wissen op basis van het vinkje.
+      try {
+        if (rememberBox.checked) localStorage.setItem(PW_KEY, pwInput.value);
+        else localStorage.removeItem(PW_KEY);
+      } catch (e) { /* localStorage geblokkeerd */ }
     } catch {
       setStatus('Kon de upload niet voorbereiden (staan de Vercel-functies live?).', 'is-err');
       submitBtn.disabled = false;
