@@ -21,32 +21,15 @@ const locColors = LOCATION_COLORS;
 
   <section class="section section--ink">
     <div class="container--wide">
-      <!-- Filters -->
+      <!-- Filters (compacte dropdowns, naast elkaar; client-side opgebouwd) -->
       <div class="g-bar" data-bar hidden>
-        <div class="g-frow">
-          <span class="g-flabel">Soort</span>
-          <div class="g-chips" data-group="type">
-            <button class="g-chip is-active" data-filter="type" data-value="">Alles</button>
-            <button class="g-chip" data-filter="type" data-value="image" data-foto hidden>Foto's</button>
-            <button class="g-chip" data-filter="type" data-value="video" data-video hidden>Video's</button>
-          </div>
+        <div class="g-controls">
+          <div class="g-dd" data-dd="type"></div>
+          <div class="g-dd" data-dd="location" hidden></div>
+          <div class="g-dd" data-dd="year" hidden></div>
+          <button class="g-reset" data-reset hidden>Wis ✕</button>
         </div>
-        <div class="g-frow" data-locrow hidden>
-          <span class="g-flabel">Locatie</span>
-          <div class="g-chips" data-group="location">
-            <button class="g-chip is-active" data-filter="location" data-value="">Alle</button>
-          </div>
-        </div>
-        <div class="g-frow" data-yearrow hidden>
-          <span class="g-flabel">Periode</span>
-          <div class="g-chips" data-group="year">
-            <button class="g-chip is-active" data-filter="year" data-value="">Alle</button>
-          </div>
-        </div>
-        <div class="g-barfoot">
-          <p class="g-count"><b data-count>0</b> <span>items</span></p>
-          <button class="g-reset" data-reset hidden>Wis filters ✕</button>
-        </div>
+        <p class="g-count"><b data-count>0</b> <span>items</span></p>
       </div>
 
       <!-- Laadstaat -->
@@ -86,14 +69,13 @@ const locColors = LOCATION_COLORS;
 </BaseLayout>
 
 <style>
-  .g-bar { display: flex; flex-direction: column; gap: 1.1rem; margin-bottom: 1.8rem; }
-  .g-frow { display: grid; gap: 0.5rem; }
-  .g-flabel { font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.66rem; color: var(--on-dark-faint); }
-  .g-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .g-barfoot { display: flex; align-items: center; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-dark); }
+  .g-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.8rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line-dark); }
+  .g-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+  .g-dd { position: relative; }
+  .g-count { margin-left: auto; white-space: nowrap; }
   .g-count b { font-family: var(--font-display); font-size: 1.3rem; color: var(--red); }
   .g-count span { color: var(--on-dark-soft); font-size: 0.88rem; }
-  .g-reset { margin-left: auto; color: var(--on-dark-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.74rem; }
+  .g-reset { color: var(--on-dark-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.74rem; padding: 0.3rem 0.4rem; }
   .g-reset:hover { color: var(--red); }
   .g-none { text-align: center; padding: 3rem 1rem; color: var(--on-dark-faint); font-size: 1rem; }
   .g-linklike { color: var(--on-dark-soft); text-decoration: underline; font-weight: 700; }
@@ -141,14 +123,19 @@ const locColors = LOCATION_COLORS;
 <!-- JS-aangemaakte elementen (tegels, play-overlay, lightbox-media) krijgen geen
      scoped styles; daarom hier globaal, genamespaced onder .g-grid / .lb. -->
 <style is:global>
-  /* Filterchips: locatie/periode-chips worden via JS aangemaakt -> globaal. */
-  .g-bar .g-chip { font-weight: 700; font-size: 0.82rem; padding: 0.45rem 0.95rem; border-radius: 100px; border: 1px solid var(--line-dark); color: var(--on-dark-soft); background: var(--panel); transition: all 0.18s var(--ease); white-space: nowrap; cursor: pointer; }
-  .g-bar .g-chip:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
-  .g-bar .g-chip.is-active { background: var(--red); border-color: var(--red); color: #fff; }
-  .g-bar .g-chip--loc { display: inline-flex; align-items: center; gap: 0.45rem; }
-  .g-bar .g-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); flex: none; }
-  .g-bar .g-chip--loc.is-active { background: var(--c); border-color: var(--c); color: #0B1220; }
-  .g-bar .g-chip--loc.is-active .g-dot { background: rgba(11,18,32,0.5); }
+  /* Filter-dropdowns: knop + menu worden via JS aangemaakt -> globaal. */
+  .g-bar .g-dd__btn { display: inline-flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.85rem; border-radius: 100px; border: 1px solid var(--line-dark); background: var(--panel); color: #fff; cursor: pointer; transition: border-color 0.18s, background 0.18s; }
+  .g-bar .g-dd__btn:hover { border-color: rgba(255,255,255,0.35); }
+  .g-bar .g-dd.is-active .g-dd__btn, .g-bar .g-dd.is-open .g-dd__btn { border-color: var(--red); }
+  .g-bar .g-dd__lab { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--on-dark-faint); }
+  .g-bar .g-dd__val { font-weight: 700; font-size: 0.85rem; white-space: nowrap; }
+  .g-bar .g-dd__chev { color: var(--on-dark-soft); transition: transform 0.2s; flex: none; }
+  .g-bar .g-dd.is-open .g-dd__chev { transform: rotate(180deg); }
+  .g-bar .g-dd__menu { position: absolute; top: calc(100% + 0.4rem); left: 0; z-index: 40; min-width: max(100%, 12rem); margin: 0; list-style: none; background: var(--ink); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 0.35rem; box-shadow: 0 24px 48px -24px #000; max-height: 320px; overflow-y: auto; }
+  .g-bar .g-dd__opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.7rem; border-radius: 6px; cursor: pointer; font-size: 0.86rem; color: var(--on-dark-soft); white-space: nowrap; }
+  .g-bar .g-dd__opt:hover { background: var(--panel); color: #fff; }
+  .g-bar .g-dd__opt.is-active { color: #fff; background: rgba(229,57,47,0.16); }
+  .g-bar .g-dd__dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--c); flex: none; }
 
   .g-grid .g-item {
     display: block; width: 100%; margin: 0 0 0.9rem; padding: 0;
@@ -176,8 +163,6 @@ const locColors = LOCATION_COLORS;
   const loadingEl = document.querySelector('[data-loading]');
   const emptyEl = document.querySelector('[data-empty]');
   const countEl = document.querySelector('[data-count]');
-  const fotoChip = document.querySelector('[data-foto]');
-  const videoChip = document.querySelector('[data-video]');
   const noneEl = document.querySelector('[data-none]');
   const resetBtn = document.querySelector('[data-reset]');
   let items = [];
@@ -305,46 +290,103 @@ const locColors = LOCATION_COLORS;
     if (noneEl) noneEl.hidden = visible.length !== 0;
   }
 
-  function buildFilterChips() {
-    // Locatie-chips: alleen locaties die echt voorkomen, met hun kleur.
-    const locGroup = document.querySelector('[data-group="location"]');
+  // ---- Filter-dropdowns ----
+  const DD = {}; // dim -> { cont, btn, valEl, menu, options }
+
+  function closeAllDD() {
+    Object.values(DD).forEach((d) => {
+      d.menu.hidden = true;
+      d.btn.setAttribute('aria-expanded', 'false');
+      d.cont.classList.remove('is-open');
+    });
+  }
+  function openDD(dim) {
+    const d = DD[dim];
+    if (!d) return;
+    d.menu.hidden = false;
+    d.btn.setAttribute('aria-expanded', 'true');
+    d.cont.classList.add('is-open');
+  }
+  function setDD(dim, value, silent) {
+    state[dim] = value;
+    const d = DD[dim];
+    if (d) {
+      const opt = d.options.find((o) => o.value === value) || d.options[0];
+      d.valEl.textContent = opt ? opt.label : '';
+      d.cont.classList.toggle('is-active', !!value);
+      d.menu.querySelectorAll('.g-dd__opt').forEach((li) => li.classList.toggle('is-active', li.dataset.value === value));
+    }
+    if (!silent) apply();
+  }
+  function buildDropdown(dim, label, options) {
+    const cont = document.querySelector(`[data-dd="${dim}"]`);
+    if (!cont || options.length <= 1) return; // geen echte keuze -> dropdown overslaan
+    cont.hidden = false;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'g-dd__btn';
+    btn.setAttribute('aria-haspopup', 'listbox');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML =
+      `<span class="g-dd__lab">${label}</span><span class="g-dd__val"></span>` +
+      `<svg class="g-dd__chev" viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const menu = document.createElement('ul');
+    menu.className = 'g-dd__menu';
+    menu.setAttribute('role', 'listbox');
+    menu.hidden = true;
+    options.forEach((o) => {
+      const li = document.createElement('li');
+      li.className = 'g-dd__opt';
+      li.setAttribute('role', 'option');
+      li.dataset.value = o.value;
+      li.innerHTML = (o.color ? `<span class="g-dd__dot" style="--c:${o.color}"></span>` : '') + `<span>${o.label}</span>`;
+      li.addEventListener('click', (e) => { e.stopPropagation(); setDD(dim, o.value); closeAllDD(); });
+      menu.appendChild(li);
+    });
+    cont.appendChild(btn);
+    cont.appendChild(menu);
+    DD[dim] = { cont, btn, valEl: btn.querySelector('.g-dd__val'), menu, options };
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wasOpen = !menu.hidden;
+      closeAllDD();
+      if (!wasOpen) openDD(dim);
+    });
+    setDD(dim, '', true);
+  }
+
+  function buildDropdowns() {
+    // Soort: alleen tonen als er echt foto's én video's zijn.
+    const hasImg = items.some((x) => x.type === 'image');
+    const hasVid = items.some((x) => x.type === 'video');
+    if (hasImg && hasVid) {
+      buildDropdown('type', 'Soort', [
+        { value: '', label: 'Alles' },
+        { value: 'image', label: "Foto's" },
+        { value: 'video', label: "Video's" },
+      ]);
+    }
+
+    // Locatie: alleen locaties die echt voorkomen, met hun kleur.
+    const locOpts = [{ value: '', label: 'Alle locaties' }];
     Object.keys(locMap)
       .filter((slug) => items.some((it) => it.location === slug))
-      .forEach((slug) => {
-        const b = document.createElement('button');
-        b.className = 'g-chip g-chip--loc';
-        b.dataset.filter = 'location';
-        b.dataset.value = slug;
-        b.style.setProperty('--c', locColors[slug] || 'var(--red)');
-        b.innerHTML = `<span class="g-dot"></span>${locMap[slug]}`;
-        locGroup.appendChild(b);
-        document.querySelector('[data-locrow]').hidden = false;
-      });
+      .forEach((slug) => locOpts.push({ value: slug, label: locMap[slug], color: locColors[slug] || 'var(--red)' }));
+    buildDropdown('location', 'Locatie', locOpts);
 
-    // Periode-chips op uploaddatum, slim begrensd: de recentste jaren expliciet,
-    // de rest gebundeld als "Ouder" — zodat het niet uitdijt over de jaren.
-    const yearGroup = document.querySelector('[data-group="year"]');
+    // Periode op uploaddatum, slim begrensd: recentste jaren + "Ouder".
     const RECENT = 3;
     const allYears = [...new Set(items.map((it) => yearOf(it.createdAt)).filter(Boolean))].sort((a, b) => Number(b) - Number(a));
     const shownYears = allYears.slice(0, RECENT);
     const hasOlder = allYears.length > RECENT;
     olderThreshold = hasOlder ? Number(shownYears[shownYears.length - 1]) : 0;
-    const addYearChip = (value, label) => {
-      const b = document.createElement('button');
-      b.className = 'g-chip';
-      b.dataset.filter = 'year';
-      b.dataset.value = value;
-      b.textContent = label;
-      yearGroup.appendChild(b);
-    };
-    shownYears.forEach((y) => addYearChip(y, y));
-    if (hasOlder) addYearChip('older', 'Ouder');
-    if (allYears.length) document.querySelector('[data-yearrow]').hidden = false;
+    const yearOpts = [{ value: '', label: 'Alle periodes' }].concat(shownYears.map((y) => ({ value: y, label: y })));
+    if (hasOlder) yearOpts.push({ value: 'older', label: 'Ouder' });
+    buildDropdown('year', 'Periode', yearOpts);
   }
 
   function resetFilters() {
-    state.type = ''; state.location = ''; state.year = '';
-    bar.querySelectorAll('.g-chip').forEach((c) => c.classList.toggle('is-active', c.dataset.value === ''));
+    ['type', 'location', 'year'].forEach((d) => setDD(d, '', true));
     apply();
   }
 
@@ -409,15 +451,9 @@ const locColors = LOCATION_COLORS;
     else if (e.key === 'ArrowRight' && visible.length > 1) showAt(lbPos + 1);
   });
 
-  // Filterchips: gedelegeerd, zodat ook dynamisch toegevoegde locatie/periode-chips werken.
-  bar.addEventListener('click', (e) => {
-    const chip = e.target.closest('.g-chip');
-    if (!chip || !chip.dataset.filter) return;
-    const dim = chip.dataset.filter;
-    state[dim] = chip.dataset.value;
-    bar.querySelectorAll(`.g-chip[data-filter="${dim}"]`).forEach((c) => c.classList.toggle('is-active', c === chip));
-    apply();
-  });
+  // Sluit open dropdowns bij klik buiten of Escape (klikken binnen stoppen propagatie).
+  document.addEventListener('click', closeAllDD);
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllDD(); });
   document.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', resetFilters));
 
   // ---- Init ----
@@ -433,9 +469,7 @@ const locColors = LOCATION_COLORS;
     if (!items.length) { emptyEl.hidden = false; return; }
     render();
     bar.hidden = false;
-    if (items.some((x) => x.type === 'image')) fotoChip.hidden = false;
-    if (items.some((x) => x.type === 'video')) videoChip.hidden = false;
-    buildFilterChips();
+    buildDropdowns();
     apply();
   })();
 </script>
