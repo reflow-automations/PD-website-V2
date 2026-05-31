@@ -103,6 +103,8 @@ import { CHAT_WEBHOOK } from '../consts';
 <style is:global>
   .chat .msg { max-width: 85%; padding: 0.65rem 0.85rem; border-radius: 12px; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
   .chat .msg--bot { background: var(--panel-2); border: 1px solid var(--line-dark); align-self: flex-start; border-bottom-left-radius: 3px; color: var(--on-dark); }
+  .chat .msg--bot a { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--red); }
+  .chat .msg--bot a:hover { color: var(--red); }
   .chat .msg--user { background: var(--red); color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
   .chat .msg--typing { display: inline-flex; gap: 4px; align-self: flex-start; }
   .chat .msg--typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--on-dark-soft); animation: chatDot 1.2s infinite ease-in-out; }
@@ -141,10 +143,25 @@ import { CHAT_WEBHOOK } from '../consts';
     const save = () => sessionStorage.setItem('pd-chat-msgs', JSON.stringify(msgs.slice(-40)));
     const scroll = () => { log.scrollTop = log.scrollHeight; };
 
+    const escapeHtml = (s: string) =>
+      s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] || c));
+    // Maakt paden (/lesrooster), boekingslinks (x.trainin.app) en e-mails klikbaar.
+    function linkify(raw: string) {
+      const re = /(https?:\/\/[^\s<]+)|([a-z0-9-]+\.trainin\.app(?:\/[^\s<]*)?|(?:www\.)?freerunkleding\.nl(?:\/[^\s<]*)?)|(\/(?:lessen|lesrooster|locaties(?:\/#[a-z-]+)?|kinderfeestjes|zakelijk|over-ons|contact|faq))|([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi;
+      return escapeHtml(raw).replace(re, (m, url, dom, path, email) => {
+        const ext = (href: string, text: string) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+        if (url) { const t = url.replace(/[.,)]+$/, ''); return ext(t, t) + url.slice(t.length); }
+        if (dom) { const t = dom.replace(/[.,)]+$/, ''); return ext('https://' + t, t) + dom.slice(t.length); }
+        if (path) return `<a href="${path}">${path}</a>`;
+        if (email) return `<a href="mailto:${email}">${email}</a>`;
+        return m;
+      });
+    }
     function bubble(m: Msg) {
       const el = document.createElement('div');
       el.className = 'msg msg--' + m.role;
-      el.textContent = m.text;
+      if (m.role === 'bot') el.innerHTML = linkify(m.text);
+      else el.textContent = m.text;
       return el;
     }
     function render() {
