@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+
+const services = [
+  {
+    title: 'Workshops',
+    text: 'Een Freerunning-workshop op onze locatie of bij u op locatie, in een gymzaal, op school, in de openbare ruimte of in een bedrijfsruimte. We leren de basisvaardigheden van Parkour & Freerunning aan alle doelgroepen: kleuters, kinderen, scholieren, volwassenen en senioren. Desgewenst nemen we onze eigen materialen mee.',
+  },
+  {
+    title: "Demo's",
+    text: 'Ons topteam van atleten zet overal een toffe show neer. Flexibel inzetbaar voor elk evenement, met de mogelijkheid om obstakels te boeken die de demonstratie naar een hoger niveau tillen. Zo gaven we o.a. een demo bij het Provinciehuis van Zuid-Holland tijdens "Skip the dip".',
+  },
+  {
+    title: "Promovideo's",
+    text: 'Op zoek naar een unieke promovideo waarin freerunners de meest extreme bewegingen vertonen? Onze atleten zijn te boeken voor shoots. We werkten eerder met merken als No Way Monday (kledinglijn) en Albert Heijn (commercial voor Delicate, met André Sannikov in de hoofdrol).',
+  },
+  {
+    title: 'Bedrijfsuitjes',
+    text: 'Een actief uitje met je team in onze indoor zalen of bij u op locatie. Ervaar wat Freerunning is, hoe toegankelijk het is voor iedereen, sportief of niet, en ontdek een andere vorm van fitness. Materiaal huren voor extra plezier kan ook.',
+  },
+  {
+    title: 'Inrichting openbare ruimte',
+    text: 'Wilt u de openbare ruimte inrichten met een tof Urban Sports Park? Onze experts hebben ervaring met het opzetten ervan, van ontwerp tot realisatie ontzorgen we u van A tot Z. We hielpen al op verschillende plekken in Nederland mee.',
+  },
+];
+---
+
+<BaseLayout
+  title="Zakelijk & Urban Experience"
+  description="Workshops, demo's, bedrijfsuitjes, promovideo's en het inrichten van Urban Sports Parken. Parkour Disciplines levert maatwerk voor bedrijven en gemeenten."
+>
+  <PageHero
+    eyebrow="Zakelijk · Urban Experience"
+    title="Freerun lessen? Dat is niet alles!"
+    intro="Elk bedrijf is uniek. Daarom bieden we maatwerk: van een dynamische Parkour-locatie ontwerpen tot een inspirerende workshop of een adembenemende demonstratie voor uw evenement."
+  />
+
+  <section class="section section--ink">
+    <div class="container">
+      <div class="zk-grid">
+        {services.map((s, i) => (
+          <article class="zk reveal" style={`--reveal-delay:${i * 70}ms`}>
+            <span class="zk__num">{String(i + 1).padStart(2, '0')}</span>
+            <h2 class="zk__title">{s.title}</h2>
+            <p class="zk__text">{s.text}</p>
+          </article>
+        ))}
+        <article class="zk zk--cta">
+          <h2 class="zk__title">Iets anders in gedachten?</h2>
+          <p class="zk__text">Vertel ons wat u zoekt, we denken graag mee en sturen een passende, vrijblijvende offerte.</p>
+          <a href="#offerte" class="btn btn--red">Vraag een offerte aan</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--panel" id="offerte">
+    <div class="container zk-form">
+      <div class="zk-form__intro">
+        <p class="eyebrow">Vrijblijvende offerte</p>
+        <h2 class="h2">Vertel ons over uw plan</h2>
+        <p class="zk-form__lead">Vul het formulier in en ontvang van ons een passende offerte voor een workshop, demo, bedrijfsuitje of de inrichting van een Urban Sports Park.</p>
+      </div>
+      <ContactForm
+        subject="Zakelijk / Urban Experience"
+        subjects={['Workshop', "Demo / show", 'Bedrijfsuitje', "Promovideo", 'Inrichting openbare ruimte', 'Anders']}
+      />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .zk-grid { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
+  .zk { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 1.8rem; border-top: 3px solid var(--red); }
+  .zk__num { font-family: var(--font-display); font-size: 1.8rem; color: var(--red); }
+  .zk__title { font-size: 1.5rem; margin: 0.3rem 0 0.6rem; }
+  .zk__text { color: var(--on-dark-soft); font-size: 0.95rem; }
+  .zk--cta { background: linear-gradient(135deg, rgba(229,57,47,0.16), var(--panel)); display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .zk--cta .btn { margin-top: 0.8rem; }
+  @media (min-width: 720px) { .zk-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1080px) { .zk-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  .zk-form { display: grid; gap: 2.5rem; }
+  .zk-form__lead { color: var(--on-dark-soft); font-size: var(--step-1); margin-top: 1rem; max-width: 44ch; }
+  @media (min-width: 900px) { .zk-form { grid-template-columns: 0.9fr 1.1fr; gap: 4rem; align-items: start; } }
+</style>

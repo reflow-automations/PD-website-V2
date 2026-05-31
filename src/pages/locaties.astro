@@ -1,0 +1,158 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import PriceTable from '../components/PriceTable.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { photo } from '../lib/photos';
+import { locations, TYPE_LABEL, mapsUrl } from '../data/locations';
+import { CONTACT, SITE } from '../consts';
+
+const badgeClass = (t: string) =>
+  t === 'indoor' ? 'badge--indoor' : t === 'outdoor' ? 'badge--outdoor' : 'badge--both';
+
+// Structured data (lokale SEO)
+const ld = locations
+  .filter((l) => l.address)
+  .map((l) => ({
+    '@context': 'https://schema.org',
+    '@type': 'SportsActivityLocation',
+    name: `Parkour Disciplines, ${l.name}`,
+    url: `${SITE.url}/locaties/#${l.slug}`,
+    telephone: '+31850765270',
+    sport: 'Parkour & Freerunning',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: l.address!.street,
+      ...(l.address!.postcode ? { postalCode: l.address!.postcode } : {}),
+      addressLocality: l.address!.city,
+      addressCountry: 'NL',
+    },
+    parentOrganization: { '@type': 'Organization', name: 'Parkour Disciplines' },
+  }));
+---
+
+<BaseLayout
+  title="Locaties"
+  description="6 Parkour & Freerunning locaties in Nederland: Alphen aan den Rijn, Zoetermeer, Leiden, Krimpenerwaard en Nijmegen. Bekijk adressen, prijzen en lestijden."
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  </Fragment>
+
+  <PageHero
+    eyebrow="6 locaties in Nederland"
+    title="Vind jouw plek"
+    intro="Indoor of outdoor, dichtbij huis. Bekijk per locatie de adressen, abonnementsprijzen en lestijden, en boek je gratis proefles."
+  >
+    <nav class="locnav" aria-label="Spring naar locatie">
+      {locations.map((l) => (
+        <a href={`#${l.slug}`} class="locnav__pill">{l.name}</a>
+      ))}
+    </nav>
+  </PageHero>
+
+  <div class="section section--ink locs">
+    <div class="container">
+      {locations.map((loc, i) => (
+        <section class="locblock" id={loc.slug}>
+          <div class="locblock__media">
+            <Image
+              src={photo(loc.photo)}
+              alt={`Freerunning bij ${loc.name} in ${loc.city}`}
+              widths={[500, 800]}
+              sizes="(max-width: 900px) 90vw, 42vw"
+              class="locblock__img"
+              style={`object-position:${loc.imgPos ?? 'center'}`}
+            />
+            <span class={`badge ${badgeClass(loc.type)} locblock__badge`}>{TYPE_LABEL[loc.type]}</span>
+          </div>
+
+          <div class="locblock__info">
+            <p class="locblock__city">{loc.city}</p>
+            <h2 class="locblock__name">{loc.name}</h2>
+            <p class="locblock__intro">{loc.intro}</p>
+
+            {loc.address && (
+              <p class="locblock__addr">
+                {loc.address.street}{loc.address.postcode ? `, ${loc.address.postcode}` : ''} {loc.address.city}
+                {mapsUrl(loc) && (
+                  <a href={mapsUrl(loc)!} target="_blank" rel="noopener" class="locblock__map">Route →</a>
+                )}
+              </p>
+            )}
+
+            <div class="locblock__actions">
+              <a href={`/lesrooster/?locatie=${loc.slug}`} class="btn btn--red">Bekijk lesrooster</a>
+              <a href={loc.bookHref} {...(loc.bookHref.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})} class="btn btn--ghost">Gratis proefles</a>
+            </div>
+
+            <div class="locblock__cols">
+              <PriceTable items={loc.abonnementen} title="Abonnementen" />
+              <div class="locblock__side">
+                {loc.openingstijden.length > 0 && (
+                  <div class="opening">
+                    <h4 class="opening__title">Openingstijden</h4>
+                    <ul role="list">
+                      {loc.openingstijden.map((o) => (
+                        <li><span>{o.dag}</span><span>{o.tijd}</span></li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {loc.team.length > 0 && (
+                  <div class="team">
+                    <h4 class="opening__title">Coaches</h4>
+                    <div class="team__chips">
+                      {loc.team.map((t) => <span class="team__chip">{t}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .locnav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.8rem; }
+  .locnav__pill { border: 1px solid var(--line-dark); border-radius: 100px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; color: var(--on-dark-soft); }
+  .locnav__pill:hover { border-color: var(--red); color: #fff; }
+
+  .locs { padding-top: clamp(2.5rem, 5vw, 4rem); }
+  .locblock {
+    display: grid; gap: 2rem; padding-block: clamp(2.5rem, 5vw, 4rem);
+    border-bottom: 1px solid var(--line-dark); scroll-margin-top: 6rem;
+  }
+  .locblock:last-of-type { border-bottom: 0; }
+  .locblock__media { position: relative; }
+  .locblock__img { width: 100%; height: 100%; max-height: 30rem; object-fit: cover; border-radius: var(--radius); clip-path: polygon(0 0, 100% 0, 100% 94%, 0 100%); }
+  .locblock__badge { position: absolute; top: 1rem; left: 1rem; background: rgba(11,18,32,0.7); backdrop-filter: blur(4px); }
+  .locblock__city { font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; color: var(--red); }
+  .locblock__name { font-size: clamp(1.8rem, 5vw, 3rem); margin-top: 0.3rem; }
+  .locblock__intro { color: var(--on-dark-soft); margin-top: 1rem; max-width: 52ch; }
+  .locblock__addr { margin-top: 1rem; color: var(--on-dark); font-weight: 600; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+  .locblock__map { color: var(--red); font-weight: 800; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .locblock__map:hover { text-decoration: underline; }
+  .locblock__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.5rem; }
+  .locblock__cols { display: grid; gap: 1.8rem; margin-top: 2rem; padding-top: 1.6rem; border-top: 1px solid var(--line-dark); }
+  .locblock__side { display: grid; gap: 1.6rem; align-content: start; }
+
+  .opening__title { font-family: var(--font-sans); font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.72rem; color: var(--red); margin-bottom: 0.7rem; }
+  .opening ul { display: flex; flex-direction: column; gap: 0.3rem; }
+  .opening li { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem; color: var(--on-dark-soft); }
+  .opening li span:last-child { color: var(--on-dark); font-weight: 600; }
+  .team__chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .team__chip { font-size: 0.78rem; padding: 0.3rem 0.6rem; border: 1px solid var(--line-dark); border-radius: 100px; color: var(--on-dark-soft); }
+
+  @media (min-width: 900px) {
+    .locblock { grid-template-columns: 0.85fr 1.15fr; gap: 3rem; align-items: start; }
+    .locblock__media { position: sticky; top: 6rem; }
+    .locblock__cols { grid-template-columns: 1.1fr 0.9fr; gap: 2.5rem; }
+  }
+</style>

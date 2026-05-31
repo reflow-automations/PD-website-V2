@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { FAQ } from '../data/faq';
+import { CONTACT } from '../consts';
+
+// FAQPage structured data
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.flatMap((c) =>
+    c.items.map((it) => ({
+      '@type': 'Question',
+      name: it.q,
+      acceptedAnswer: { '@type': 'Answer', text: it.a },
+    }))
+  ),
+};
+---
+
+<BaseLayout
+  title="Veelgestelde vragen"
+  description="Antwoord op de meestgestelde vragen over proeflessen, lidmaatschap, betalingen en de app van Parkour Disciplines."
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  </Fragment>
+
+  <PageHero
+    eyebrow="FAQ"
+    title="Veelgestelde vragen"
+    intro="Heb je een vraag? Wij helpen je graag. Staat je vraag er niet bij? Neem gerust contact met ons op."
+  />
+
+  <section class="section section--ink">
+    <div class="container faq">
+      {FAQ.map((cat) => (
+        <div class="faq__cat">
+          <h2 class="faq__cattitle"><span class="slash-rule"></span>{cat.title}</h2>
+          <div class="faq__list">
+            {cat.items.map((it) => (
+              <details class="qa">
+                <summary class="qa__q">
+                  <span>{it.q}</span>
+                  <span class="qa__icon" aria-hidden="true"></span>
+                </summary>
+                <div class="qa__a"><p>{it.a}</p></div>
+              </details>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div class="faq__contact">
+        <p>Geen antwoord gevonden?</p>
+        <div class="faq__actions">
+          <a href="/contact/" class="btn btn--red">Stel je vraag</a>
+          <a href={CONTACT.phoneHref} class="btn btn--ghost">Bel {CONTACT.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .faq { max-width: 52rem; }
+  .faq__cat { margin-bottom: 2.5rem; }
+  .faq__cattitle { display: flex; align-items: center; gap: 0.8rem; font-size: 1.4rem; margin-bottom: 1rem; }
+  .faq__list { display: grid; gap: 0.6rem; }
+  .qa { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); overflow: hidden; }
+  .qa__q {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem 1.3rem; cursor: pointer; list-style: none; font-weight: 700; font-size: 1.02rem;
+  }
+  .qa__q::-webkit-details-marker { display: none; }
+  .qa__q:hover { color: #fff; }
+  .qa__icon { position: relative; width: 16px; height: 16px; flex: none; }
+  .qa__icon::before, .qa__icon::after { content: ""; position: absolute; background: var(--red); transition: transform 0.25s var(--ease); }
+  .qa__icon::before { top: 7px; left: 0; width: 16px; height: 2px; }
+  .qa__icon::after { left: 7px; top: 0; width: 2px; height: 16px; }
+  .qa[open] .qa__icon::after { transform: scaleY(0); }
+  .qa__a { padding: 0 1.3rem 1.2rem; color: var(--on-dark-soft); }
+  .qa__a p { max-width: 60ch; }
+
+  .faq__contact { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--line-dark); }
+  .faq__contact p { font-family: var(--font-display); text-transform: uppercase; font-size: 1.5rem; margin-bottom: 1rem; }
+  .faq__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+</style>

@@ -1,0 +1,141 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import PriceTable from '../components/PriceTable.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { photo } from '../lib/photos';
+import { locations } from '../data/locations';
+import { KIDS_INTRO, TESTIMONIALS } from '../data/content';
+
+const withParty = locations.filter((l) => l.kinderfeestje.length > 0);
+const onRequest = locations.filter((l) => l.kinderfeestje.length === 0 || l.kinderfeestje.some((k) => !k.url));
+
+const program = [
+  { t: 'Even voorstellen', d: 'Een leuke introductie waarbij onze enthousiaste coaches zich voorstellen en iedereen elkaar beter leert kennen.' },
+  { t: 'Achtergrond freerunnen', d: 'Een korte, boeiende uitleg over de geschiedenis en filosofie van freerunnen, zodat de kinderen snappen wat de sport zo uniek maakt.' },
+  { t: 'Warming-up', d: 'Leuke, energieke opwarmoefeningen om de spieren los te maken en klaar te stomen voor actie.' },
+  { t: 'Basistechnieken', d: 'Stap-voor-stap instructie over de fundamentele bewegingen, waarbij veiligheid en plezier voorop staan.' },
+  { t: 'Parcours afleggen', d: 'Een spannend parcours waar de kinderen hun nieuwe skills toepassen, met uitdagingen op hun niveau.' },
+  { t: 'Vrij spelen', d: 'Ruimte om zelfstandig te oefenen en hun creativiteit in beweging te laten zien.' },
+];
+
+const eisen = [
+  { t: 'Vanaf 6 jaar', d: 'Kinderen hebben een minimumleeftijd van 6 jaar.' },
+  { t: 'Max. 2 jaar verschil', d: 'Deelnemers verschillen niet meer dan 2 jaar in leeftijd (i.v.m. niveau).' },
+  { t: 'Comfortabele kleding', d: 'Comfortabele kleding en schone binnen- (gym)schoenen of schone buitengympen.' },
+];
+---
+
+<BaseLayout
+  title="Kinderfeestjes"
+  description="Het coolste kinderfeestje van de klas bij Parkour Disciplines. Freerunnen onder begeleiding op meerdere locaties, boek direct."
+>
+  <PageHero eyebrow="Kinderfeestjes" title="Het coolste feestje van de klas" intro={KIDS_INTRO} />
+
+  <section class="section section--light">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Zo ziet jouw feestje eruit</p>
+          <h2 class="h2">Een programma vol actie</h2>
+        </div>
+      </div>
+      <div class="kf-intro">
+        <div class="kf-included">
+          {program.map((it, i) => (
+            <div class="kf-item">
+              <span class="kf-item__num">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3 class="kf-item__t">{it.t}</h3>
+                <p class="kf-item__d">{it.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div class="kf-media">
+          <Image src={photo('coach-kid.jpeg')} alt="Kind en coach tijdens een freerun-kinderfeestje" widths={[400, 700]} sizes="(max-width: 900px) 90vw, 36vw" class="kf-media__img" />
+        </div>
+      </div>
+
+      <div class="kf-eisen">
+        {eisen.map((e) => (
+          <div class="kf-eis">
+            <h3 class="kf-eis__t">{e.t}</h3>
+            <p class="kf-eis__d">{e.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--ink">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Prijzen per locatie</p>
+          <h2 class="h2">Boek jullie feestje</h2>
+        </div>
+      </div>
+      <div class="kf-grid">
+        {withParty.map((loc) => (
+          <article class="kf-card">
+            <header class="kf-card__head">
+              <h3 class="kf-card__name">{loc.name}</h3>
+              <span class="kf-card__city">{loc.city}</span>
+            </header>
+            <PriceTable items={loc.kinderfeestje} />
+          </article>
+        ))}
+      </div>
+      <p class="kf-note">
+        Ook op andere locaties zijn feestjes mogelijk (prijs op aanvraag). Neem hiervoor
+        <a href="/contact/"> contact</a> met ons op.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--panel">
+    <div class="container">
+      {TESTIMONIALS.map((t) => (
+        <figure class="kf-testi">
+          <blockquote>&ldquo;{t.quote}&rdquo;</blockquote>
+          <figcaption><b>{t.author}</b> · {t.context}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <CtaBand title="Liever eerst even sparren?" sub="Bel of mail ons over de mogelijkheden, we denken graag mee over het perfecte feestje." />
+</BaseLayout>
+
+<style>
+  .kf-intro { display: grid; gap: 2.5rem; align-items: center; }
+  .kf-included { display: grid; gap: 1.4rem; }
+  .kf-item { display: flex; gap: 1rem; align-items: start; }
+  .kf-item__num { font-family: var(--font-display); font-size: 1.6rem; color: var(--red); line-height: 1; }
+  .kf-item__t { font-family: var(--font-sans); font-weight: 800; font-size: 1.15rem; color: var(--text); text-transform: none; letter-spacing: -0.01em; }
+  .kf-item__d { color: #4b5159; margin-top: 0.2rem; }
+  .kf-media { aspect-ratio: 4 / 5; border-radius: var(--radius); overflow: hidden; clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); }
+  .kf-media__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (min-width: 880px) { .kf-intro { grid-template-columns: 1.1fr 0.9fr; gap: 3.5rem; } }
+
+  .kf-eisen { display: grid; gap: 1rem; margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--line-light); }
+  .kf-eis { padding-left: 1rem; border-left: 3px solid var(--red); }
+  .kf-eis__t { font-family: var(--font-sans); font-weight: 800; font-size: 1.05rem; color: var(--text); text-transform: none; letter-spacing: -0.01em; }
+  .kf-eis__d { color: #4b5159; font-size: 0.92rem; margin-top: 0.2rem; }
+  @media (min-width: 720px) { .kf-eisen { grid-template-columns: repeat(3, 1fr); gap: 1.6rem; } }
+
+  .kf-grid { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
+  .kf-card { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 1.4rem; border-top: 3px solid var(--red); }
+  .kf-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+  .kf-card__name { font-size: 1.4rem; }
+  .kf-card__city { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--on-dark-faint); }
+  .kf-note { color: var(--on-dark-faint); font-size: 0.9rem; margin-top: 1.6rem; }
+  .kf-note a { color: var(--red); text-decoration: underline; }
+  @media (min-width: 720px) { .kf-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .kf-testi { max-width: 50rem; margin-inline: auto; text-align: center; }
+  .kf-testi blockquote { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1.4rem, 3.5vw, 2.2rem); line-height: 1.05; }
+  .kf-testi figcaption { margin-top: 1rem; color: var(--red); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.85rem; }
+</style>

@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ScheduleExplorer from '../components/ScheduleExplorer.astro';
+import CtaBand from '../components/CtaBand.astro';
+---
+
+<BaseLayout
+  title="Lesrooster"
+  description="Het complete lesrooster van Parkour Disciplines. Filter op locatie, leeftijd en dag, voor alle 6 locaties in Nederland."
+>
+  <PageHero
+    eyebrow="Lesrooster"
+    title="Alle lestijden, één overzicht"
+    intro="Filter op locatie, leeftijd en dag, of bekijk meteen het rooster van jouw locatie. Voor alle niveaus, van peuter tot 65+."
+  />
+
+  <section class="section section--ink">
+    <div class="container">
+      <ScheduleExplorer />
+      <p class="rooster-note">
+        Lestijden kunnen per seizoen wijzigen. Inschrijven en je gratis proefles boek je via je locatie, 
+        kies hierboven een locatie en bekijk de details onder <a href="/locaties/">Locaties</a>.
+      </p>
+    </div>
+  </section>
+
+  <CtaBand title="Gevonden wat bij je past?" sub="Boek een gratis proefles bij de les die je aanspreekt en ervaar het zelf." />
+</BaseLayout>
+
+<style>
+  .rooster-note { color: var(--on-dark-faint); font-size: 0.85rem; margin-top: 2rem; max-width: 60ch; }
+  .rooster-note a { color: var(--on-dark-soft); text-decoration: underline; }
+  .rooster-note a:hover { color: #fff; }
+</style>

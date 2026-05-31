@@ -1,0 +1,128 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { photo } from '../lib/photos';
+import { locations } from '../data/locations';
+import { MISSION, MISSION_2, STATS } from '../data/content';
+
+const FOUNDER = 'Reggy Laatsch';
+const allTeam = [...new Set(locations.flatMap((l) => l.team))];
+const team = [FOUNDER, ...allTeam.filter((n) => n !== FOUNDER)];
+
+const history = [
+  { year: '2006', title: 'Start van onze reis', text: 'In juni 2006 begon Reggy Laatsch met freerunning. Hij zag een video van "russian climbing" en dacht: dit wil ik ook kunnen! Hij ging meteen met vrienden de straat op. We wisten toen nog niet dat het een sport was, we noemden het "freestylen". Uiteindelijk bleef Reggy over met Hawar Ahmad. Op een dag kwamen we Mike Moolenbroek tegen, die aan Parkour deed: zo snel en efficiënt mogelijk van A naar B.' },
+  { year: '2007', title: 'De reis', text: 'We trainden elke dag. Mike leerde ons de basis en de kracht van visie: kijk naar je omgeving, wat kun je ermee? We begonnen een team, team U.G. (Urban Graphics), en gingen jaarlijks naar Nijmegen, een stad met enorme mogelijkheden. Reggy besloot een sportopleiding te volgen om er iets mee te doen.' },
+  { year: '2008', title: 'De school', text: 'We kregen een vaste trainingsdag in het stadshart van Zoetermeer, "de spot", omringd met muren, rails en rotsen. Onder een nieuwe naam, Team Hyperspeed (geïnspireerd door The Prodigy), begonnen we gratis lessen te geven. We wilden maar één ding: mensen laten ervaren hoe leuk de sport is.' },
+  { year: '2010', title: 'Start van het bedrijf', text: 'De onderneming werd gestart en de groep groeide van 40 naar 70 leden. Meer lessen, binnen én buiten, en we begonnen leerlingen op te leiden tot coaches, onze "mini coaches". Met examens kon je je skills laten zien en een geel shirt verdienen: je hoorde dan bij de Elite Freerunning groep.' },
+  { year: '2013', title: 'Parkour Disciplines', text: 'Team Hyperspeed klonk ons niet serieus genoeg, dus hernoemden we de organisatie naar Parkour Disciplines. We deden mee aan programma\'s als "Klaas kan alles". In Alphen aan den Rijn kregen we van de gemeente de kans om met gesloopt parkeergarage-materiaal een outdoor park te bouwen. En we hadden een privé-ontmoeting met David Belle, de grondlegger van Parkour, een onwijze eer.' },
+  { year: '2017', title: 'De Stealth Academy', text: 'Onze droom werd werkelijkheid: onze eerste indoor locatie. Negen maanden lang bouwden we in het grootste geheim van leden en coaches aan deze plek, om deze via een verrassingsevenement aan de wereld te presenteren.' },
+  { year: '2019', title: 'Outdoor Noord Aa', text: 'De gemeenteraad van Zoetermeer gaf akkoord voor de bouw van hal Gymworld Zoetermeer. We realiseerden ook een outdoor park bij Noord Aa, bedoeld om jong en oud te laten bewegen. Met de crew trainden we dat jaar in een verlaten staalfabriek in Duisburg.' },
+  { year: '2020', title: 'Nieuwe locaties', text: 'Eind augustus opende de Gymworld Freerun Academy in Zoetermeer, onze 2e locatie. In Alphen aan den Rijn bouwden we in een oude winkel de Hero Academy, en aan het einde van het jaar opende de Play Freerun Academy in Leiden.' },
+  { year: '2021', title: 'Sportshop & hybride gym', text: 'We openden de Sportshop in Gymworld Zoetermeer, meteen ook ons kantoor. In een parkeergarage ontstond de RUA (Roots Underground Academy): een ruimte vol mobiele obstakels, zodat alle lessen ook bij de barste weersomstandigheden doorgaan.' },
+];
+---
+
+<BaseLayout
+  title="Over ons"
+  description="Van vrienden op straat in 2006 tot 6 locaties: het verhaal van Parkour Disciplines, dé Parkour & Freerunning school van Nederland."
+>
+  <PageHero
+    eyebrow="Over ons"
+    title="Wie zijn wij?"
+    intro={MISSION}
+  />
+
+  <!-- Missie -->
+  <section class="section section--ink">
+    <div class="container--wide about-grid">
+      <div class="about-media reveal">
+        <Image src={photo('golden-coach.jpg')} alt="Coaches en leerlingen van Parkour Disciplines" widths={[500, 900]} sizes="(max-width: 900px) 90vw, 44vw" class="about-img" />
+      </div>
+      <div class="about-text reveal">
+        <p class="eyebrow">Onze missie</p>
+        <h2 class="h3">Veilig, verantwoord en voor iedereen</h2>
+        <p class="about-p">{MISSION_2}</p>
+        <p class="about-p">Of je nu een beginnende of ervaren atleet bent, bij Parkour Disciplines bieden wij iets voor iedereen. We hopen je snel te zien bij een van onze trainingen of activiteiten!</p>
+        <ul class="stats" role="list">
+          {STATS.map((s) => (
+            <li class="stat"><b class="stat__value">{s.value}</b><span class="stat__label">{s.label}</span></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tijdlijn -->
+  <section class="section section--panel">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Sinds 2006</p>
+          <h2 class="h2">Ons verhaal</h2>
+        </div>
+      </div>
+      <ol class="timeline" role="list">
+        {history.map((h) => (
+          <li class="tl reveal">
+            <div class="tl__year">{h.year}</div>
+            <div class="tl__body">
+              <h3 class="tl__title">{h.title}</h3>
+              <p class="tl__text">{h.text}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- Team -->
+  <section class="section section--ink">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">{team.length} gecertificeerde coaches</p>
+          <h2 class="h2">Het team</h2>
+        </div>
+      </div>
+      <p class="team-lead">Ons team van gekwalificeerde instructeurs zorgt dat elke les veilig, uitdagend en leerzaam is, verspreid over al onze locaties.</p>
+      <div class="teamwall">
+        {team.map((name) => (
+          <span class:list={['teamwall__name', name === FOUNDER && 'is-founder']}>
+            {name}{name === FOUNDER && <em class="teamwall__role">Oprichter</em>}
+          </span>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand title="Word onderdeel van het verhaal" sub="Boek een gratis proefles en ontdek waarom freerunning meer is dan een sport." />
+</BaseLayout>
+
+<style>
+  .about-grid { display: grid; gap: 2.5rem; align-items: center; }
+  .about-img { width: 100%; border-radius: var(--radius); clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); max-height: 60svh; object-fit: cover; }
+  .about-text .h3 { margin: 0.6rem 0 1rem; }
+  .about-p { color: var(--on-dark-soft); margin-bottom: 1rem; max-width: 52ch; }
+  .stats { display: grid; grid-template-columns: repeat(4, auto); gap: 1.2rem 2rem; margin-top: 1.5rem; justify-content: start; }
+  .stat__value { font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem); color: #fff; line-height: 1; display: block; letter-spacing: 0.05em; }
+  .stat__label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--on-dark-faint); }
+  @media (min-width: 900px) { .about-grid { grid-template-columns: 0.95fr 1.05fr; gap: 4rem; } }
+
+  .timeline { display: grid; gap: 0; position: relative; }
+  .tl { display: grid; grid-template-columns: auto 1fr; gap: 1.4rem; padding-bottom: 2.2rem; position: relative; }
+  .tl__year { font-family: var(--font-display); font-size: clamp(1.4rem, 4vw, 2rem); color: var(--red); width: 4.5ch; }
+  .tl__body { border-left: 2px solid var(--line-dark); padding-left: 1.4rem; padding-bottom: 0.5rem; position: relative; }
+  .tl__body::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; background: var(--red); border-radius: 50%; box-shadow: 0 0 0 4px var(--panel); }
+  .tl__title { font-size: 1.4rem; }
+  .tl__text { color: var(--on-dark-soft); margin-top: 0.5rem; max-width: 64ch; }
+  @media (min-width: 680px) { .tl { grid-template-columns: 6ch 1fr; gap: 2rem; } }
+
+  .team-lead { color: var(--on-dark-soft); font-size: var(--step-1); max-width: 52ch; margin-bottom: 1.8rem; }
+  .teamwall { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .teamwall__name { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1rem, 2.5vw, 1.5rem); color: var(--on-dark); padding: 0.4rem 0.9rem; border: 1px solid var(--line-dark); border-radius: 3px; transition: all 0.2s var(--ease); }
+  .teamwall__name:hover { border-color: rgba(255, 255, 255, 0.3); }
+  .teamwall__name.is-founder { border-color: var(--red); background: rgba(229, 57, 47, 0.08); }
+  .teamwall__role { font-family: var(--font-sans); font-style: normal; font-weight: 800; font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); margin-left: 0.5rem; vertical-align: middle; }
+</style>

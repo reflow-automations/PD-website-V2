@@ -1,0 +1,26 @@
+---
+import { TRIAL_HREF } from '../consts';
+
+interface Props {
+  href?: string;
+  variant?: 'red' | 'ghost' | 'dark' | 'light';
+  size?: 'md' | 'lg';
+  label?: string;
+  class?: string;
+}
+
+const {
+  href = TRIAL_HREF,
+  variant = 'red',
+  size = 'md',
+  label = 'Gratis proefles',
+  class: cls = '',
+} = Astro.props;
+---
+
+<a href={href} class:list={['btn', `btn--${variant}`, size === 'lg' && 'btn--lg', cls]}>
+  {label}
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+  </svg>
+</a>

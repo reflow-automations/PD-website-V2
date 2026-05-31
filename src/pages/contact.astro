@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { CONTACT, EXTERNAL } from '../consts';
+
+const channels = [
+  { label: 'Algemeen', value: CONTACT.email, href: `mailto:${CONTACT.email}`, note: 'Vragen & info' },
+  { label: 'Support / app', value: CONTACT.support, href: `mailto:${CONTACT.support}`, note: `Of bel ${CONTACT.supportPhone}` },
+  { label: 'Administratie', value: CONTACT.admin, href: `mailto:${CONTACT.admin}`, note: 'Betalingen & incasso' },
+  { label: 'Opzeggen', value: CONTACT.cancel, href: `mailto:${CONTACT.cancel}`, note: 'Abonnement beëindigen' },
+];
+---
+
+<BaseLayout
+  title="Contact"
+  description="Neem contact op met Parkour Disciplines. Bel 085 076 5270 of mail info@parkourdisciplines.com, we reageren binnen 3 werkdagen."
+>
+  <PageHero
+    eyebrow="Contact"
+    title="Hoe kunnen we helpen?"
+    intro="Vraag over lessen, een proefles, een feestje of je abonnement? Bel, mail of stuur het formulier, we reageren doorgaans binnen 3 werkdagen."
+  />
+
+  <section class="section section--ink">
+    <div class="container contact">
+      <div class="contact__form">
+        <h2 class="h3">Stuur een bericht</h2>
+        <ContactForm />
+      </div>
+
+      <aside class="contact__aside">
+        <a href={CONTACT.phoneHref} class="contact__phone">{CONTACT.phone}</a>
+        <p class="contact__phonenote">Direct bellen kan ook</p>
+
+        <ul class="channels" role="list">
+          {channels.map((c) => (
+            <li class="channel">
+              <span class="channel__label">{c.label}</span>
+              <a href={c.href} class="channel__value">{c.value}</a>
+              <span class="channel__note">{c.note}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div class="contact__links">
+          <a href="/faq/" class="btn btn--ghost">Veelgestelde vragen</a>
+          <a href={EXTERNAL.login} target="_blank" rel="noopener" class="btn btn--ghost">Inloggen leden</a>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact { display: grid; gap: 3rem; }
+  .contact__form .h3 { margin-bottom: 1.5rem; }
+  .contact__phone { font-family: var(--font-display); font-size: clamp(2rem, 6vw, 3.2rem); color: #fff; line-height: 1; }
+  .contact__phone:hover { color: var(--red); }
+  .contact__phonenote { color: var(--on-dark-faint); font-size: 0.85rem; margin-top: 0.3rem; }
+  .channels { display: grid; gap: 1.1rem; margin: 2rem 0; }
+  .channel { display: grid; gap: 0.15rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line-dark); }
+  .channel__label { font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.68rem; color: var(--red); }
+  .channel__value { color: #fff; font-weight: 600; }
+  .channel__value:hover { color: var(--red); }
+  .channel__note { color: var(--on-dark-faint); font-size: 0.82rem; }
+  .contact__links { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+  @media (min-width: 880px) { .contact { grid-template-columns: 1.2fr 0.8fr; gap: 4rem; } }
+</style>

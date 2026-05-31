@@ -1,0 +1,203 @@
+---
+import { allRooster, locations, DAGEN, AGE_FILTERS, ageKey, stripNieuw, LOCATION_COLORS, TYPE_LABEL } from '../data/locations';
+
+const entries = allRooster
+  .map((e) => ({ ...e, dag: stripNieuw(e.dag), age: ageKey(e.groep) }))
+  .sort((a, b) => a.start.localeCompare(b.start));
+
+const byDay = DAGEN.map((d) => ({
+  day: d,
+  items: entries.filter((e) => e.dag === d),
+}));
+
+const total = entries.length;
+---
+
+<div class="rooster" data-rooster data-total={total}>
+  <div class="rooster__filters">
+    <div class="fgroup">
+      <span class="fgroup__label">Locatie</span>
+      <div class="chips">
+        <button class="chip is-active" data-filter="loc" data-value="">Alle</button>
+        {locations.map((l) => (
+          <button class="chip chip--loc" data-filter="loc" data-value={l.slug} style={`--c:${LOCATION_COLORS[l.slug]}`}>
+            <span class="chip__dot"></span>{l.name}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <span class="fgroup__label">Leeftijd</span>
+      <div class="chips">
+        <button class="chip is-active" data-filter="age" data-value="">Alle</button>
+        {AGE_FILTERS.map((a) => (
+          <button class="chip" data-filter="age" data-value={a.key}>{a.label}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <span class="fgroup__label">Dag</span>
+      <div class="chips">
+        <button class="chip is-active" data-filter="dag" data-value="">Alle</button>
+        {DAGEN.map((d) => (
+          <button class="chip" data-filter="dag" data-value={d}>{d.slice(0, 2)}</button>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <div class="rooster__bar">
+    <p class="rooster__count"><b data-count>{total}</b> <span>lessen gevonden</span></p>
+    <button class="rooster__reset" data-reset hidden>Wis filters ✕</button>
+  </div>
+
+  <div class="rooster__grid">
+    {byDay.map((col) => (
+      <section class="daycol" data-day={col.day}>
+        <h3 class="daycol__h">{col.day}</h3>
+        <div class="daycol__list">
+          {col.items.map((it) => (
+            <article class="cls" data-loc={it.locationSlug} data-age={it.age} data-dag={it.dag} style={`--c:${LOCATION_COLORS[it.locationSlug]}`}>
+              <span class="cls__time">{it.start}<span class="cls__dash">-</span>{it.eind}</span>
+              <span class="cls__group">
+                {it.groep}
+                {it.nieuw && <em class="cls__new">Nieuw</em>}
+              </span>
+              <a class="cls__loc" href={`/locaties/#${it.locationSlug}`}>
+                <span class="dot"></span><b>{it.locationName}</b><em>{TYPE_LABEL[it.locationType]}</em>
+              </a>
+            </article>
+          ))}
+          <p class="daycol__empty" hidden>Geen lessen met deze filters.</p>
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <p class="rooster__none" data-none hidden>
+    Geen lessen gevonden met deze combinatie. <button data-reset class="linklike">Wis de filters</button> en probeer opnieuw.
+  </p>
+</div>
+
+<style>
+  .rooster { --col-gap: 1rem; }
+  .rooster__filters { display: flex; flex-direction: column; gap: 1.1rem; }
+  .fgroup { display: grid; gap: 0.5rem; }
+  .fgroup__label { font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.68rem; color: var(--on-dark-faint); }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .chip {
+    font-weight: 700; font-size: 0.82rem; padding: 0.45rem 0.9rem; border-radius: 100px;
+    border: 1px solid var(--line-dark); color: var(--on-dark-soft); background: var(--panel);
+    transition: all 0.18s var(--ease); white-space: nowrap;
+  }
+  .chip:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+  .chip.is-active { background: var(--red); border-color: var(--red); color: #fff; }
+  .chip--loc { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .chip__dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); flex: none; }
+  .chip--loc.is-active { background: var(--c); border-color: var(--c); color: #0B1220; }
+  .chip--loc.is-active .chip__dot { background: rgba(11, 18, 32, 0.5); }
+
+  .rooster__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1.6rem 0 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--line-dark); }
+  .rooster__count b { font-family: var(--font-display); font-size: 1.5rem; color: var(--red); }
+  .rooster__count span { color: var(--on-dark-soft); font-size: 0.9rem; }
+  .rooster__reset, .linklike { color: var(--on-dark-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.76rem; }
+  .rooster__reset:hover, .linklike:hover { color: var(--red); }
+  .linklike { text-decoration: underline; }
+
+  .rooster__grid { display: grid; gap: var(--col-gap); grid-template-columns: 1fr; }
+  .daycol { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 0.9rem; }
+  .daycol__h { font-size: 1.15rem; padding-bottom: 0.6rem; margin-bottom: 0.6rem; border-bottom: 2px solid var(--red); position: sticky; top: 5rem; background: var(--panel); }
+  .daycol__list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .cls { display: grid; gap: 0.15rem; padding: 0.7rem 0.8rem; background: var(--ink); border: 1px solid var(--line-dark); border-radius: 3px; border-left: 3px solid var(--c, var(--red)); }
+  .cls__time { font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.03em; }
+  .cls__dash { color: var(--on-dark-faint); margin: 0 0.45em; font-family: var(--font-sans); font-weight: 600; }
+  .cls__group { font-size: 0.86rem; color: var(--on-dark); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+  .cls__new { font-style: normal; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; background: var(--red); color: #fff; padding: 0.1rem 0.35rem; border-radius: 2px; }
+  .cls__loc { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .cls__loc b { color: var(--c); font-weight: 800; }
+  .cls__loc em { color: var(--on-dark-faint); font-style: normal; font-weight: 600; }
+  .cls__loc:hover b { filter: brightness(1.18); }
+  .dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; flex: none; background: var(--c); }
+  .daycol__empty, .rooster__none { color: var(--on-dark-faint); font-size: 0.85rem; padding: 0.5rem 0; }
+  .rooster__none { text-align: center; padding: 2rem 0; font-size: 1rem; }
+
+  .daycol[hidden], .cls[hidden] { display: none; }
+
+  @media (min-width: 560px) { .rooster__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .rooster__grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1200px) { .rooster__grid { grid-template-columns: repeat(7, 1fr); align-items: start; } .daycol { padding: 0.7rem; } }
+</style>
+
+<script>
+  (() => {
+    const root = document.querySelector('[data-rooster]') as HTMLElement | null;
+    if (!root) return;
+    const state = { loc: '', age: '', dag: '' };
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('.chip'));
+    const classes = Array.from(root.querySelectorAll<HTMLElement>('.cls'));
+    const cols = Array.from(root.querySelectorAll<HTMLElement>('.daycol'));
+    const countEl = root.querySelector('[data-count]');
+    const resetBtn = root.querySelector<HTMLElement>('.rooster__reset');
+    const noneEl = root.querySelector<HTMLElement>('[data-none]');
+
+    function apply() {
+      let visible = 0;
+      classes.forEach((c) => {
+        const ok =
+          (!state.loc || c.dataset.loc === state.loc) &&
+          (!state.age || c.dataset.age === state.age) &&
+          (!state.dag || c.dataset.dag === state.dag);
+        c.hidden = !ok;
+        if (ok) visible++;
+      });
+      cols.forEach((col) => {
+        const dayMatch = !state.dag || col.dataset.day === state.dag;
+        const hasVisible = col.querySelector('.cls:not([hidden])');
+        col.hidden = !dayMatch || !hasVisible;
+        const empty = col.querySelector<HTMLElement>('.daycol__empty');
+        if (empty) empty.hidden = !!hasVisible;
+      });
+      if (countEl) countEl.textContent = String(visible);
+      const active = !!(state.loc || state.age || state.dag);
+      if (resetBtn) resetBtn.hidden = !active;
+      if (noneEl) noneEl.hidden = visible !== 0;
+    }
+
+    function setActive(filter: string, value: string) {
+      (state as any)[filter] = value;
+      chips
+        .filter((ch) => ch.dataset.filter === filter)
+        .forEach((ch) => ch.classList.toggle('is-active', ch.dataset.value === value));
+      apply();
+    }
+
+    chips.forEach((ch) =>
+      ch.addEventListener('click', () => setActive(ch.dataset.filter!, ch.dataset.value!))
+    );
+    root.querySelectorAll('[data-reset]').forEach((b) =>
+      b.addEventListener('click', () => {
+        setActive('loc', '');
+        setActive('age', '');
+        setActive('dag', '');
+      })
+    );
+
+    // Pre-filter via ?locatie=slug en/of ?leeftijd=key
+    const params = new URLSearchParams(location.search);
+    const loc = params.get('locatie');
+    const age = params.get('leeftijd');
+    let preset = false;
+    if (loc && chips.some((c) => c.dataset.filter === 'loc' && c.dataset.value === loc)) {
+      setActive('loc', loc);
+      preset = true;
+    }
+    if (age && chips.some((c) => c.dataset.filter === 'age' && c.dataset.value === age)) {
+      setActive('age', age);
+      preset = true;
+    }
+    if (preset) root.scrollIntoView({ behavior: 'auto', block: 'start' });
+    else apply();
+  })();
+</script>

@@ -1,0 +1,108 @@
+---
+import { FORM_ENDPOINT, CONTACT } from '../consts';
+
+interface Props {
+  subject?: string;
+  subjects?: string[];
+  compact?: boolean;
+}
+const {
+  subject = 'Algemene vraag',
+  subjects = ['Algemene vraag', 'Gratis proefles', 'Kinderfeestje', 'Zakelijk / Urban Experience', 'Vraag over abonnement'],
+} = Astro.props;
+---
+
+<form class="cform" data-cform data-endpoint={FORM_ENDPOINT} data-mailto={CONTACT.email} data-default-subject={subject}>
+  <div class="cform__row">
+    <label class="field">
+      <span>Naam</span>
+      <input type="text" name="naam" required autocomplete="name" />
+    </label>
+    <label class="field">
+      <span>E-mailadres</span>
+      <input type="email" name="email" required autocomplete="email" />
+    </label>
+  </div>
+  <div class="cform__row">
+    <label class="field">
+      <span>Telefoon <em>(optioneel)</em></span>
+      <input type="tel" name="telefoon" autocomplete="tel" />
+    </label>
+    <label class="field">
+      <span>Onderwerp</span>
+      <select name="onderwerp">
+        {subjects.map((s) => <option value={s} selected={s === subject}>{s}</option>)}
+      </select>
+    </label>
+  </div>
+  <label class="field">
+    <span>Bericht</span>
+    <textarea name="bericht" rows="5" required></textarea>
+  </label>
+  <div class="cform__foot">
+    <button type="submit" class="btn btn--red btn--lg">Verstuur bericht
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <p class="cform__note" data-status>We reageren doorgaans binnen 3 werkdagen.</p>
+  </div>
+</form>
+
+<style>
+  .cform { display: grid; gap: 1rem; }
+  .cform__row { display: grid; gap: 1rem; }
+  .field { display: grid; gap: 0.4rem; }
+  .field > span { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--on-dark-soft); }
+  .field em { color: var(--on-dark-faint); font-style: normal; text-transform: none; letter-spacing: 0; }
+  .field input, .field select, .field textarea {
+    background: var(--ink); border: 1px solid var(--line-dark); border-radius: var(--radius);
+    padding: 0.8rem 0.9rem; color: #fff; font-size: 0.95rem; transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--red); }
+  .field textarea { resize: vertical; }
+  .cform__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 0.4rem; }
+  .cform__note { color: var(--on-dark-faint); font-size: 0.82rem; }
+  .cform__note.is-error { color: #ff9a91; }
+  .cform__note.is-ok { color: #8ee06a; }
+  @media (min-width: 620px) { .cform__row { grid-template-columns: 1fr 1fr; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-cform]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[data-status]');
+    const endpoint = form.dataset.endpoint || '';
+    const mailto = form.dataset.mailto || '';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+      const setStatus = (msg: string, cls = '') => {
+        if (!status) return;
+        status.textContent = msg;
+        status.className = 'cform__note' + (cls ? ' ' + cls : '');
+      };
+
+      if (endpoint) {
+        try {
+          setStatus('Versturen…');
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...data, _page: location.pathname }),
+          });
+          if (!res.ok) throw new Error('bad status');
+          form.reset();
+          setStatus('Bedankt! Je bericht is verstuurd, we reageren snel.', 'is-ok');
+        } catch {
+          setStatus('Er ging iets mis. Mail ons direct via ' + mailto + '.', 'is-error');
+        }
+      } else {
+        // Fallback zonder backend: open de mailclient met ingevulde gegevens.
+        const body =
+          `Naam: ${data.naam}\nE-mail: ${data.email}\nTelefoon: ${data.telefoon || '-'}\n\n${data.bericht}`;
+        const href = `mailto:${mailto}?subject=${encodeURIComponent('[' + (data.onderwerp || 'Contact') + '] ' + data.naam)}&body=${encodeURIComponent(body)}`;
+        window.location.href = href;
+        setStatus('Je mailprogramma opent met je bericht. Versturen maar!', 'is-ok');
+      }
+    });
+  });
+</script>

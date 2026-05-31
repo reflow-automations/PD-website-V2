@@ -1,0 +1,371 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BookTrialButton from '../components/BookTrialButton.astro';
+import LocationsGrid from '../components/LocationsGrid.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { photo } from '../lib/photos';
+import { USPS, MISSION, MISSION_2, PATH, STATS, TESTIMONIALS, FOUNDER_TEASER, ZAKELIJK_INTRO, KIDS_INTRO, NEWS } from '../data/content';
+---
+
+<BaseLayout>
+  <!-- ===================== HERO ===================== -->
+  <section class="hero noise">
+    <span class="hero__ghost" aria-hidden="true">PD</span>
+    <div class="hero__inner container--wide">
+      <div class="hero__content">
+        <p class="eyebrow">Indoor &amp; outdoor freerunning</p>
+        <h1 class="hero__title">Breek de<br /><span class="hl">zwaartekracht</span></h1>
+        <p class="hero__sub">
+          De leukste Parkour &amp; Freerunning school van Nederland. Voor alle leeftijden, op
+          6 locaties, van je eerste sprong tot je eigen stijl.
+        </p>
+        <div class="hero__actions">
+          <BookTrialButton size="lg" />
+          <a href="/locaties/" class="btn btn--ghost btn--lg">Bekijk locaties</a>
+        </div>
+        <ul class="hero__stats" role="list">
+          <li><b>2006</b><span>opgericht</span></li>
+          <li><b>6</b><span>locaties</span></li>
+          <li><b>Alle</b><span>leeftijden</span></li>
+        </ul>
+      </div>
+
+      <div class="hero__media">
+        <span class="hero__shape" aria-hidden="true"></span>
+        <Image
+          src={photo('hero-flip-red.jpg')}
+          alt="Freerunner maakt een flip tegen een graffiti-muur"
+          widths={[500, 800, 1100]}
+          sizes="(max-width: 900px) 100vw, 46vw"
+          class="hero__img"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MARQUEE ===================== -->
+  <div class="band marquee" aria-hidden="true">
+    <div class="marquee__track">
+      {[0, 1].map(() => (
+        <span class="marquee__seq">
+          {['Community', 'Discipline', 'Progressie', 'Indoor', 'Outdoor', 'Voor iedereen'].map((w) => (
+            <span class="mw">{w}</span>
+          ))}
+        </span>
+      ))}
+    </div>
+  </div>
+
+  <!-- ===================== WAAROM (light) ===================== -->
+  <section class="section section--light" id="waarom">
+    <div class="container">
+      <div class="why__head">
+        <div>
+          <p class="eyebrow">Waarom freerunnen</p>
+          <h2 class="h2 why__title">Maak kennis met de meest<br /><span class="outline-word">uitdagende</span> sport die er is</h2>
+        </div>
+        <p class="why__intro">{MISSION}</p>
+      </div>
+      <div class="why__grid">
+        {USPS.map((u, i) => (
+          <article class="usp reveal" style={`--reveal-delay:${i * 90}ms`}>
+            <span class="usp__num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="usp__title">{u.title}</h3>
+            <p class="usp__text">{u.text}</p>
+          </article>
+        ))}
+      </div>
+      <p class="why__foot">{MISSION_2}</p>
+    </div>
+  </section>
+
+  <!-- ===================== JOUW PAD / PROGRESSIE ===================== -->
+  <section class="section path" id="pad">
+    <div class="container">
+      <div class="path__head reveal">
+        <div>
+          <p class="eyebrow">Jouw pad</p>
+          <h2 class="h2">Van eerste sprong<br />tot eigen stijl</h2>
+        </div>
+        <a href="/lessen/" class="btn btn--ghost">Alle lessen</a>
+      </div>
+      <ol class="path__steps" role="list">
+        {PATH.map((step, i) => (
+          <li class="reveal" style={`--reveal-delay:${i * 80}ms`}>
+            <a class="step" href={`/lesrooster/?leeftijd=${step.filter}`}>
+              <span class="step__num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="step__age">{step.age}</span>
+              <h3 class="step__title">{step.title}</h3>
+              <p class="step__text">{step.text}</p>
+              <span class="step__cta">Bekijk lestijden
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== LOCATIES ===================== -->
+  <section class="section section--panel" id="locaties">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div>
+          <p class="eyebrow">6 locaties in Nederland</p>
+          <h2 class="h2">Vind jouw plek</h2>
+        </div>
+        <a href="/locaties/" class="btn btn--ghost">Alle locaties &amp; prijzen</a>
+      </div>
+      <LocationsGrid />
+    </div>
+  </section>
+
+  <!-- ===================== COMMUNITY ===================== -->
+  <section class="section community">
+    <div class="container--wide community__grid">
+      <div class="community__media reveal">
+        <Image
+          src={photo('golden-coach.jpg')}
+          alt="Coach en leerling trainen samen tijdens het gouden uur"
+          widths={[500, 800, 1000]}
+          sizes="(max-width: 900px) 90vw, 42vw"
+          class="community__img"
+        />
+      </div>
+      <div class="community__content reveal">
+        <p class="eyebrow">Onze community</p>
+        <h2 class="h2">Meer dan een sport.<br />Een community.</h2>
+        <p class="community__lead">{FOUNDER_TEASER}</p>
+        <ul class="stats" role="list">
+          {STATS.map((s) => (
+            <li class="stat">
+              <b class="stat__value">{s.value}</b>
+              <span class="stat__label">{s.label}</span>
+            </li>
+          ))}
+        </ul>
+        <a href="/over-ons/" class="btn btn--red">Lees ons verhaal</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ZAKELIJK + KINDERFEESTJES ===================== -->
+  <section class="section section--light">
+    <div class="container">
+      <div class="duo">
+        <article class="promo reveal">
+          <Image src={photo('coach-kid.jpeg')} alt="Coach en kind bij een kinderfeestje" widths={[500, 800]} sizes="(max-width: 800px) 90vw, 44vw" class="promo__img" style="object-position:50% 18%" />
+          <div class="promo__body">
+            <p class="eyebrow">Kinderfeestjes</p>
+            <h3 class="promo__title">Het coolste feestje van de klas</h3>
+            <p class="promo__text">{KIDS_INTRO}</p>
+            <a href="/kinderfeestjes/" class="btn btn--light">Boek een feestje</a>
+          </div>
+        </article>
+        <article class="promo reveal" style="--reveal-delay:100ms">
+          <Image src={photo('indoor-precision.jpg')} alt="Freerunner traint in de indoor hal" widths={[500, 800]} sizes="(max-width: 800px) 90vw, 44vw" class="promo__img" />
+          <div class="promo__body">
+            <p class="eyebrow">Zakelijk &amp; Urban Experience</p>
+            <h3 class="promo__title">Workshops, demo&apos;s &amp; meer</h3>
+            <p class="promo__text">{ZAKELIJK_INTRO}</p>
+            <a href="/zakelijk/" class="btn btn--light">Bekijk zakelijke diensten</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TESTIMONIAL ===================== -->
+  <section class="section testi">
+    <div class="container">
+      {TESTIMONIALS.map((t) => (
+        <figure class="testi__fig reveal">
+          <span class="testi__mark" aria-hidden="true">&ldquo;</span>
+          <blockquote class="testi__quote">{t.quote}</blockquote>
+          <figcaption class="testi__cap">
+            <b>{t.author}</b><span>{t.context}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <!-- ===================== NIEUWS ===================== -->
+  <section class="section section--panel">
+    <div class="container">
+      <div class="sec-head reveal">
+        <div>
+          <p class="eyebrow">Laatste nieuws</p>
+          <h2 class="h2">Uit de community</h2>
+        </div>
+      </div>
+      <div class="news">
+        {NEWS.map((n, i) => (
+          <a href={n.href} target="_blank" rel="noopener" class="newscard reveal" style={`--reveal-delay:${i * 90}ms`}>
+            <div class="newscard__media">
+              <Image src={photo(n.photo)} alt={n.title} widths={[400, 700]} sizes="(max-width: 800px) 90vw, 380px" class="newscard__img" style={`object-position:${n.imgPos ?? 'center'}`} />
+            </div>
+            <div class="newscard__body">
+              <time class="newscard__date">{n.date}</time>
+              <h3 class="newscard__title">{n.title}</h3>
+              <p class="newscard__text">{n.excerpt}</p>
+              <span class="newscard__cta">Lees verder <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  /* ---------------- HERO ---------------- */
+  .hero { position: relative; overflow: hidden; isolation: isolate; padding-top: 5rem; }
+  .hero__inner {
+    display: grid; grid-template-columns: 1fr; align-items: center;
+    gap: 2rem; min-height: min(92svh, 60rem); padding-block: clamp(2.5rem, 6vw, 5rem);
+  }
+  .hero__ghost {
+    position: absolute; top: 48%; left: -0.08em; transform: translateY(-50%);
+    font-family: var(--font-display); font-size: 52vw; line-height: 0.7; color: #fff;
+    opacity: 0.025; z-index: -1; pointer-events: none; letter-spacing: -0.04em;
+  }
+  .hero__content { max-width: 38rem; }
+  .hero__title { font-size: clamp(2.7rem, 1.2rem + 5.6vw, 6rem); line-height: 0.86; letter-spacing: -0.01em; margin-top: 1.1rem; }
+  .hero__sub { font-size: var(--step-1); color: var(--on-dark-soft); margin-top: 1.6rem; max-width: 34rem; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 2rem; }
+  .hero__stats { display: flex; gap: 2.2rem; margin-top: 2.6rem; }
+  .hero__stats li { display: flex; flex-direction: column; }
+  .hero__stats b { font-family: var(--font-display); font-size: 1.9rem; line-height: 1; letter-spacing: 0.05em; }
+  .hero__stats span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.16em; color: var(--on-dark-faint); margin-top: 0.3rem; }
+
+  .hero__media { position: relative; }
+  .hero__img {
+    width: 100%; height: 100%; max-height: 78svh; object-fit: cover; object-position: 50% 35%;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 8% 100%);
+  }
+  .hero__shape {
+    position: absolute; inset: 8% -4% 8% 14%; background: var(--red); z-index: -1;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 8% 100%);
+    transform: translate(1.4rem, 1.4rem);
+  }
+  @media (min-width: 900px) {
+    .hero__inner { grid-template-columns: 1.05fr 0.95fr; gap: 3rem; }
+    .hero__media { height: 78svh; align-self: stretch; margin-top: 0; }
+  }
+  @media (max-width: 899px) {
+    .hero__media { height: 56vh; margin-top: 0.5rem; }
+    .hero__shape { inset: 6% 2% 6% 8%; }
+  }
+
+  /* Subtiele gestaggerde entree bij laden */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__content > * { animation: heroIn 0.7s var(--ease-expo) backwards; }
+    .hero__content > *:nth-child(1) { animation-delay: 0.08s; }
+    .hero__content > *:nth-child(2) { animation-delay: 0.16s; }
+    .hero__content > *:nth-child(3) { animation-delay: 0.26s; }
+    .hero__content > *:nth-child(4) { animation-delay: 0.36s; }
+    .hero__content > *:nth-child(5) { animation-delay: 0.46s; }
+    .hero__media { animation: heroImg 0.9s var(--ease-expo) 0.18s backwards; }
+  }
+  @keyframes heroIn { from { opacity: 0; transform: translateY(18px); } }
+  @keyframes heroImg { from { opacity: 0; transform: translateX(24px) scale(0.98); } }
+
+  /* ---------------- MARQUEE band ---------------- */
+  .band { background: var(--red); color: #fff; padding-block: 0.7rem; border-block: 2px solid #000; }
+  .band .marquee__track { gap: 0; }
+  .band .marquee__seq { display: flex; align-items: center; }
+  .mw { display: inline-flex; align-items: center; white-space: nowrap; font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1.1rem, 2.6vw, 1.9rem); }
+  .mw::after { content: "✦"; margin: 0 1.5rem; font-size: 0.62em; opacity: 0.85; }
+
+  /* ---------------- WHY (light) ---------------- */
+  .why__head { display: grid; gap: 1.4rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .why__title { color: var(--text); }
+  .why__intro { color: #41464f; font-size: var(--step-1); max-width: 44ch; }
+  .why__grid { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+  .usp { padding: 1.8rem; background: #fff; border: 1px solid var(--line-light); border-radius: var(--radius); border-top: 3px solid var(--red); }
+  .usp__num { font-family: var(--font-display); font-size: 2.4rem; color: var(--red); line-height: 1; }
+  .usp__title { font-family: var(--font-sans); font-weight: 800; font-size: 1.2rem; color: var(--text); margin-top: 0.7rem; text-transform: none; letter-spacing: -0.01em; }
+  .usp__text { color: #4b5159; margin-top: 0.5rem; }
+  .why__foot { color: #41464f; font-size: var(--step-1); max-width: 60ch; margin-top: 2.4rem; padding-top: 2rem; border-top: 1px solid var(--line-light); }
+  @media (min-width: 760px) {
+    .why__head { grid-template-columns: 1.3fr 1fr; align-items: end; }
+    .why__grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* ---------------- Section heads (dark) ---------------- */
+  .sec-head, .path__head { display: flex; flex-wrap: wrap; gap: 1.2rem 2rem; align-items: end; justify-content: space-between; margin-bottom: clamp(2rem, 4vw, 3rem); }
+
+  /* ---------------- PATH ---------------- */
+  .path { background: var(--ink); }
+  .path__steps { display: grid; gap: 1px; grid-template-columns: 1fr; background: var(--line-dark); border: 1px solid var(--line-dark); }
+  .path__steps > li { display: flex; }
+  .step { flex: 1; display: flex; flex-direction: column; background: var(--ink); padding: 1.6rem 1.5rem 1.8rem; position: relative; transition: background 0.25s var(--ease); overflow: hidden; }
+  .step::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--red); transform: scaleY(0); transform-origin: top; transition: transform 0.3s var(--ease); }
+  .step:hover { background: var(--ink-600); }
+  .step:hover::before { transform: scaleY(1); }
+  .step__num { font-family: var(--font-display); font-size: 1.5rem; color: var(--red); transition: transform 0.25s var(--ease); }
+  .step:hover .step__num { transform: translateX(6px); }
+  .step__age { display: block; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.68rem; color: var(--on-dark-faint); margin-top: 0.8rem; }
+  .step__title { font-size: 1.5rem; margin-top: 0.2rem; }
+  .step__text { color: var(--on-dark-soft); font-size: 0.92rem; margin-top: 0.6rem; }
+  .step__cta { margin-top: auto; padding-top: 1.1rem; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.72rem; color: var(--on-dark-faint); transition: color 0.2s; }
+  .step:hover .step__cta { color: var(--red); }
+  .step__cta svg { transition: transform 0.25s var(--ease); }
+  .step:hover .step__cta svg { transform: translateX(4px); }
+  @media (min-width: 680px) { .path__steps { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1040px) { .path__steps { grid-template-columns: repeat(5, 1fr); } }
+
+  /* ---------------- COMMUNITY ---------------- */
+  .community { background: var(--ink); }
+  .community__grid { display: grid; gap: 2.5rem; align-items: center; }
+  .community__img { width: 100%; height: 100%; max-height: 60svh; object-fit: cover; border-radius: var(--radius); clip-path: polygon(0 0, 100% 0, 100% 92%, 0 100%); }
+  .community__content { max-width: 38rem; }
+  .community__lead { color: var(--on-dark-soft); font-size: var(--step-1); margin-top: 1.2rem; }
+  .stats { display: grid; grid-template-columns: repeat(4, auto); gap: 1.4rem 2rem; margin: 2rem 0; justify-content: start; }
+  .stat__value { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); color: #fff; line-height: 1; display: block; letter-spacing: 0.05em; }
+  .stat__label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--on-dark-faint); }
+  @media (min-width: 900px) { .community__grid { grid-template-columns: 0.9fr 1.1fr; gap: 4rem; } }
+
+  /* ---------------- DUO (zakelijk + kids) ---------------- */
+  .duo { display: grid; gap: 1.4rem; }
+  .promo { position: relative; overflow: hidden; border-radius: var(--radius); min-height: 24rem; display: flex; align-items: flex-end; isolation: isolate; }
+  .promo__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform 0.6s var(--ease); }
+  .promo:hover .promo__img { transform: scale(1.05); }
+  .promo::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(7,11,20,0.97) 8%, rgba(7,11,20,0.82) 42%, rgba(7,11,20,0.5) 78%, rgba(7,11,20,0.35)); }
+  .promo__body { padding: 1.8rem; color: #fff; }
+  .promo__title { font-size: clamp(1.6rem, 4vw, 2.3rem); margin: 0.4rem 0 0.7rem; text-shadow: 0 2px 14px rgba(0,0,0,0.4); }
+  .promo__text { color: rgba(255,255,255,0.9); margin-bottom: 1.3rem; max-width: 36ch; }
+  @media (min-width: 820px) { .duo { grid-template-columns: 1fr 1fr; } }
+
+  /* ---------------- TESTIMONIAL ---------------- */
+  .testi { background: var(--ink); }
+  .testi__fig { position: relative; max-width: 56rem; margin-inline: auto; text-align: center; padding-top: 1rem; }
+  .testi__mark { position: absolute; top: -2.5rem; left: 50%; transform: translateX(-50%); font-family: var(--font-display); font-size: 8rem; color: var(--red); opacity: 0.5; line-height: 1; }
+  .testi__quote { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1.6rem, 4.5vw, 3rem); line-height: 1.02; }
+  .testi__cap { margin-top: 1.6rem; display: flex; flex-direction: column; gap: 0.2rem; }
+  .testi__cap b { color: var(--red); text-transform: uppercase; letter-spacing: 0.06em; }
+  .testi__cap span { color: var(--on-dark-faint); font-size: 0.85rem; }
+
+  /* ---------------- NEWS ---------------- */
+  .news { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
+  .newscard { background: var(--ink); border: 1px solid var(--line-dark); border-radius: var(--radius); overflow: hidden; transition: transform 0.3s var(--ease), border-color 0.3s; }
+  .newscard:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.28); }
+  .newscard__media { aspect-ratio: 16 / 10; overflow: hidden; }
+  .newscard__img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s var(--ease); }
+  .newscard:hover .newscard__img { transform: scale(1.05); }
+  .newscard__body { padding: 1.3rem; }
+  .newscard__date { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--red); font-weight: 800; }
+  .newscard__title { font-size: 1.3rem; margin: 0.5rem 0; line-height: 1; }
+  .newscard__text { color: var(--on-dark-soft); font-size: 0.92rem; }
+  .newscard__cta { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.76rem; color: var(--on-dark-soft); }
+  .newscard:hover .newscard__cta { color: #fff; }
+  .newscard:hover .newscard__cta svg { color: var(--red); }
+  @media (min-width: 720px) { .news { grid-template-columns: repeat(3, 1fr); } }
+</style>

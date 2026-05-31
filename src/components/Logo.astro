@@ -1,0 +1,42 @@
+---
+interface Props {
+  class?: string;
+  wordmark?: boolean;
+}
+const { class: cls = '', wordmark = true } = Astro.props;
+---
+
+<a href="/" class:list={['logo', cls]} aria-label="Parkour Disciplines, naar de homepage">
+  <span class="logo__gear" aria-hidden="true"></span>
+  {wordmark && (
+    <span class="logo__word">
+      <span class="logo__w1">Parkour</span>
+      <span class="logo__w2">Disciplines</span>
+    </span>
+  )}
+</a>
+
+<style>
+  .logo { display: inline-flex; align-items: center; gap: 0.6rem; }
+  .logo__gear {
+    width: 2.5rem; height: 2.5rem; flex: none;
+    background-color: var(--on-dark);
+    -webkit-mask: url('/brand/gear.png') center / contain no-repeat;
+    mask: url('/brand/gear.png') center / contain no-repeat;
+    transition: background-color 0.25s var(--ease), transform 0.4s var(--ease);
+  }
+  .logo:hover .logo__gear { background-color: var(--red); transform: rotate(20deg); }
+  .logo__word { display: flex; flex-direction: column; line-height: 0.82; }
+  .logo__w1 {
+    font-family: var(--font-display); text-transform: uppercase;
+    font-size: 1.25rem; letter-spacing: 0.015em; color: var(--on-dark);
+  }
+  .logo__w2 {
+    font-family: var(--font-sans); text-transform: uppercase; font-weight: 800;
+    font-size: 0.57rem; letter-spacing: 0.36em; color: var(--on-dark-soft);
+    margin-top: 0.22rem;
+  }
+  .section--light .logo__gear { background-color: var(--ink); }
+  .section--light .logo__w1 { color: var(--text); }
+  .section--light .logo__w2 { color: var(--muted); }
+</style>

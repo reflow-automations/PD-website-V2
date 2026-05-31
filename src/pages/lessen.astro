@@ -1,0 +1,128 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ScheduleExplorer from '../components/ScheduleExplorer.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { photo } from '../lib/photos';
+
+const learn = [
+  { t: 'Flips', d: "Van een koprol op de grond naar toffe salto's door de lucht!" },
+  { t: 'Parkour', d: 'Leer snel over obstakels te bewegen, op een spectaculaire manier!' },
+  { t: 'Creativiteit', d: 'Zo snel of mooi mogelijk alles wat je kan combineren tot een spectaculaire run!' },
+];
+
+const groups = [
+  {
+    title: 'Voor kids',
+    age: '6-16 jaar',
+    text: 'Freerunninglessen speciaal ontworpen voor kinderen en tieners tot 16 jaar. De perfecte kans om spelenderwijs je fysieke vaardigheden te ontwikkelen en nieuwe bewegingen te leren. Of je nu een beginner bent of al enige ervaring hebt: in een veilige en ondersteunende setting werk je aan kracht, behendigheid en creativiteit, terwijl je plezier hebt en deel uitmaakt van een enthousiaste, jonge gemeenschap.',
+  },
+  {
+    title: 'Voor jongeren',
+    age: '16-21 jaar',
+    text: 'Lessen speciaal afgestemd op jongeren, ideaal om je fysieke grenzen te verkennen en te verleggen terwijl je nieuwe vaardigheden leert. Of je nu net begint of je skills wilt aanscherpen: een perfecte balans tussen uitdaging en plezier, samen met leeftijdsgenoten die dezelfde passie delen.',
+  },
+  {
+    title: 'Voor volwassenen',
+    age: '21+ jaar',
+    text: 'Freerunninglessen speciaal ontworpen voor volwassenen. Ongeacht of je nieuw bent of je bestaande vaardigheden wilt verbeteren: een stimulerende mix van uitdaging en plezier. In een ondersteunende, energieke omgeving werk je aan kracht, behendigheid en creativiteit, als onderdeel van een gemotiveerde gemeenschap.',
+  },
+  {
+    title: 'Voor 65+',
+    age: 'vanaf 65 jaar',
+    text: 'Lessen speciaal aangepast voor de 65-plusser, met focus op valpreventie en stabiliteit. Een aangename mix van lichte uitdaging en veel plezier: in een veilige omgeving werken we aan balans, coördinatie en kracht, cruciaal voor een gezonde, mobiele levensstijl.',
+  },
+];
+---
+
+<BaseLayout
+  title="Lessen"
+  description="Parkour & Freerunning lessen voor alle leeftijden: kids, jongeren, volwassenen en 65+. Leer flips, parkour en creativiteit onder begeleiding van opgeleide coaches."
+>
+  <PageHero
+    eyebrow="Lessen"
+    title="Mentaal en fysiek groeien"
+    intro="Over de jaren ontwikkelden we methodes om elke freeruntechniek op een simpele manier aan te leren. Al onze trainers zijn opgeleid, zodat elke les veilig, leuk, uitdagend en gestructureerd verloopt."
+  />
+
+  <!-- Dit ga je leren -->
+  <section class="section section--light">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Dit ga jij leren</p>
+          <h2 class="h2 ink">Drie disciplines,<br />eindeloze mogelijkheden</h2>
+        </div>
+      </div>
+      <div class="learn">
+        {learn.map((l, i) => (
+          <article class="learncard reveal" style={`--reveal-delay:${i * 90}ms`}>
+            <span class="learncard__num">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="learncard__t">{l.t}</h3>
+            <p class="learncard__d">{l.d}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Doelgroepen -->
+  <section class="section section--ink">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Voor elke leeftijd</p>
+          <h2 class="h2">Vind jouw groep</h2>
+        </div>
+        <a href="/lesrooster/" class="btn btn--ghost">Naar het lesrooster</a>
+      </div>
+      <div class="groups">
+        {groups.map((g) => (
+          <article class="grp reveal">
+            <div class="grp__head">
+              <h3 class="grp__title">{g.title}</h3>
+              <span class="grp__age">{g.age}</span>
+            </div>
+            <p class="grp__text">{g.text}</p>
+          </article>
+        ))}
+      </div>
+      <p class="groups__note">Ook peuters & kleuters (2-6 jaar) kunnen bij ons terecht, bekijk de lestijden hieronder.</p>
+    </div>
+  </section>
+
+  <!-- Rooster -->
+  <section class="section section--panel" id="rooster">
+    <div class="container">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Lestijden</p>
+          <h2 class="h2">Wanneer kun je trainen?</h2>
+        </div>
+      </div>
+      <ScheduleExplorer />
+    </div>
+  </section>
+
+  <CtaBand />
+</BaseLayout>
+
+<style>
+  .ink { color: var(--text); }
+  .learn { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
+  .learncard { background: var(--ink); color: #fff; border-radius: var(--radius); padding: 1.8rem; border-left: 3px solid var(--red); }
+  .learncard__num { font-family: var(--font-display); font-size: 2rem; color: var(--red); }
+  .learncard__t { font-size: 1.7rem; margin: 0.3rem 0 0.5rem; }
+  .learncard__d { color: var(--on-dark-soft); }
+  @media (min-width: 760px) { .learn { grid-template-columns: repeat(3, 1fr); } }
+
+  .groups { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
+  .grp { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 1.6rem; }
+  .grp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.7rem; }
+  .grp__title { font-size: 1.6rem; }
+  .grp__age { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); white-space: nowrap; }
+  .grp__text { color: var(--on-dark-soft); font-size: 0.95rem; }
+  .groups__note { color: var(--on-dark-faint); font-size: 0.9rem; margin-top: 1.4rem; }
+  @media (min-width: 820px) { .groups { grid-template-columns: repeat(2, 1fr); } }
+</style>

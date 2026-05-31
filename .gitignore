@@ -1,0 +1,19 @@
+# build output
+dist/
+.vercel/
+# local tooling
+.claude/
+# generated types
+.astro/
+# deps
+node_modules/
+# logs
+*.log
+npm-debug.log*
+# env
+.env
+.env.*
+!.env.example
+# os
+.DS_Store
+Thumbs.db
