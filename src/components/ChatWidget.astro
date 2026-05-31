@@ -50,7 +50,7 @@ import { CHAT_WEBHOOK } from '../consts';
   }
   .chat__launch::after {
     content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--red);
-    animation: chatPulse 6s var(--ease) infinite; pointer-events: none;
+    animation: chatPulse 5s var(--ease) infinite; pointer-events: none;
   }
   .chat__launch:hover { transform: translateY(-2px) scale(1.04); background: var(--red-600); }
   .chat__ico { transition: opacity 0.2s, transform 0.3s var(--ease); }
@@ -58,7 +58,8 @@ import { CHAT_WEBHOOK } from '../consts';
   .chat.is-open .chat__ico--open { opacity: 0; transform: rotate(45deg); }
   .chat.is-open .chat__ico--close { opacity: 1; transform: rotate(0); }
   .chat.is-open .chat__launch::after { display: none; }
-  @keyframes chatPulse { 0% { transform: scale(1); opacity: 0.7; } 70% { transform: scale(1.6); opacity: 0; } 100% { opacity: 0; } }
+  /* Snelle ping in de eerste ~26%, daarna stil (onzichtbaar uitgedijd) tot de volgende cyclus -> minder vaak. */
+  @keyframes chatPulse { 0% { transform: scale(1); opacity: 0.7; } 26% { transform: scale(1.6); opacity: 0; } 100% { transform: scale(1.6); opacity: 0; } }
 
   .chat__panel {
     position: absolute; right: 0; bottom: 4.6rem;
