@@ -183,6 +183,7 @@ const locColors = LOCATION_COLORS;
   let items = [];
   let visible = [];
   const state = { type: '', location: '', year: '' };
+  let olderThreshold = 0; // jaargrens: items met jaar < deze waarde vallen onder "Ouder"
 
   const tx = (type, t, it, ext) =>
     `${RES}/${type}/upload/${t}/v${it.version}/${encodeURI(it.publicId)}.${ext}`;
@@ -291,7 +292,10 @@ const locColors = LOCATION_COLORS;
       const ok =
         (!state.type || el.dataset.type === state.type) &&
         (!state.location || el.dataset.loc === state.location) &&
-        (!state.year || el.dataset.year === state.year);
+        (!state.year ||
+          (state.year === 'older'
+            ? Number(el.dataset.year) > 0 && Number(el.dataset.year) < olderThreshold
+            : el.dataset.year === state.year));
       el.classList.toggle('is-hidden', !ok);
       if (ok) visible.push(Number(el.dataset.index));
     });
@@ -317,19 +321,25 @@ const locColors = LOCATION_COLORS;
         document.querySelector('[data-locrow]').hidden = false;
       });
 
-    // Periode-chips: aanwezige jaren (uit de uploaddatum), aflopend.
+    // Periode-chips op uploaddatum, slim begrensd: de recentste jaren expliciet,
+    // de rest gebundeld als "Ouder" — zodat het niet uitdijt over de jaren.
     const yearGroup = document.querySelector('[data-group="year"]');
-    [...new Set(items.map((it) => yearOf(it.createdAt)).filter(Boolean))]
-      .sort((a, b) => Number(b) - Number(a))
-      .forEach((y) => {
-        const b = document.createElement('button');
-        b.className = 'g-chip';
-        b.dataset.filter = 'year';
-        b.dataset.value = y;
-        b.textContent = y;
-        yearGroup.appendChild(b);
-        document.querySelector('[data-yearrow]').hidden = false;
-      });
+    const RECENT = 3;
+    const allYears = [...new Set(items.map((it) => yearOf(it.createdAt)).filter(Boolean))].sort((a, b) => Number(b) - Number(a));
+    const shownYears = allYears.slice(0, RECENT);
+    const hasOlder = allYears.length > RECENT;
+    olderThreshold = hasOlder ? Number(shownYears[shownYears.length - 1]) : 0;
+    const addYearChip = (value, label) => {
+      const b = document.createElement('button');
+      b.className = 'g-chip';
+      b.dataset.filter = 'year';
+      b.dataset.value = value;
+      b.textContent = label;
+      yearGroup.appendChild(b);
+    };
+    shownYears.forEach((y) => addYearChip(y, y));
+    if (hasOlder) addYearChip('older', 'Ouder');
+    if (allYears.length) document.querySelector('[data-yearrow]').hidden = false;
   }
 
   function resetFilters() {
@@ -414,7 +424,11 @@ const locColors = LOCATION_COLORS;
   (async () => {
     let list = await fetchFromApi();
     if (!list) list = await fetchFromList();
-    items = (list || []).sort((a, b) => (b.version || 0) - (a.version || 0));
+    items = (list || []).sort((a, b) => {
+      const ta = a.createdAt ? Date.parse(a.createdAt) : (a.version || 0) * 1000;
+      const tb = b.createdAt ? Date.parse(b.createdAt) : (b.version || 0) * 1000;
+      return tb - ta; // nieuwste upload eerst (datum + tijd)
+    });
     loadingEl.hidden = true;
     if (!items.length) { emptyEl.hidden = false; return; }
     render();
