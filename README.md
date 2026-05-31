@@ -32,9 +32,22 @@ npm run preview    # serveer de build lokaal
 Lestijden/prijzen wijzig je centraal in `src/data/locations.ts` — het rooster, de locatie-
 pagina en de homepage updaten automatisch mee.
 
+## Chatbot
+Een AI-chatbubbel (rechtsonder, op elke pagina) beantwoordt vragen over lessen, locaties,
+prijzen, lestijden en proeflessen.
+- **Frontend**: `src/components/ChatWidget.astro` → POST naar de n8n-webhook met `{ message, sessionId }`.
+- **Backend**: n8n-workflow "PD Chatbot (website)" (`https://n8n.reflowautomations.nl`): Webhook
+  `/webhook/pd-chat` (CORS) → AI Agent (**GPT-4.1-mini**) met de volledige PD-kennis in de system
+  prompt + Simple Memory per `sessionId` → Respond. Geen RAG/Pinecone nodig (de info is klein genoeg).
+- De system prompt + workflow staan in `scripts/build-chatbot-workflow.mjs` (genereert
+  `scripts/pd-chatbot.workflow.json`). Pas je content op de site aan? Werk dan ook de system
+  prompt bij en run het script + `PUT` naar n8n.
+- Webhook-URL staat in `CHAT_WEBHOOK` (`src/consts.ts`). Geen secrets client-side: de OpenAI-key
+  blijft in n8n. Let op: de webhook is publiek; overweeg rate-limiting bij misbruik.
+
 ## Nog te doen / open punten
-1. **Contactformulier**: vul de n8n-webhook-URL in via `FORM_ENDPOINT` in `src/consts.ts`.
-   Zolang die leeg is, valt het formulier terug op een `mailto:`-link (werkt, maar minder mooi).
+1. **Contactformulier**: blijft bewust een `mailto:`-link (opent de mailapp met vooraf ingevulde
+   mail naar info@). Wil je later stille submits + notificatie? Vul dan `FORM_ENDPOINT` in `src/consts.ts`.
 2. **Accentkleur**: nu signal-red `#E5392F`. Afstembaar op het logo in `global.css` (`--red`).
 3. **Beeld per locatie**: nu zijn algemene actiefoto's hergebruikt. Vervang ze door echte
    locatiefoto's in `src/assets/photos/` (zelfde bestandsnaam) of pas `photo` aan in `locations.ts`.

@@ -40,6 +40,9 @@ export const TRIAL_HREF = '/locaties/';
 // Vul hier de n8n-webhook-URL in (server-only verwerking, geen key in de client).
 export const FORM_ENDPOINT = '';
 
+// n8n-webhook voor de chatbot (AI agent met PD-kennis, GPT-4.1-mini).
+export const CHAT_WEBHOOK = 'https://n8n.reflowautomations.nl/webhook/pd-chat';
+
 export type NavItem = { label: string; href: string };
 
 export const NAV: NavItem[] = [
