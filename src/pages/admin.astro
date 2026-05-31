@@ -61,9 +61,12 @@ const locOpts = locations.map((l) => ({ slug: l.slug, name: l.name }));
       <div class="manage">
         <div class="manage__head">
           <h2 class="h3">Bestaande media beheren</h2>
-          <button type="button" class="admin__link" data-refresh>Vernieuwen ⟳</button>
+          <div class="manage__actions">
+            <button type="button" class="manage__saveall" data-saveall hidden disabled>Alles opslaan</button>
+            <button type="button" class="admin__link" data-refresh>Vernieuwen ⟳</button>
+          </div>
         </div>
-        <p class="manage__hint">Pas een bijschrift of locatie aan (handig bij typefouten) of verwijder een item. Gebruikt het wachtwoord hierboven.</p>
+        <p class="manage__hint">Pas bijschriften of locaties aan (handig bij typefouten) en klik op <b>Alles opslaan</b>. Verwijderen gaat per item.</p>
         <div data-manage data-cloud={CLOUDINARY.cloud} data-locs={JSON.stringify(locOpts)}>
           <p class="manage__msg">Laden…</p>
         </div>
@@ -109,7 +112,10 @@ const locOpts = locations.map((l) => ({ slug: l.slug, name: l.name }));
   .upl { list-style: none; display: grid; gap: 0.5rem; margin-top: 1.6rem; }
 
   .manage { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--line-dark); }
-  .manage__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+  .manage__head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .manage__actions { display: flex; align-items: center; gap: 1rem; }
+  .manage__saveall { background: var(--red); color: #fff; font-weight: 800; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.5rem 1.05rem; border-radius: 100px; cursor: pointer; transition: opacity 0.2s; }
+  .manage__saveall:disabled { opacity: 0.4; cursor: default; }
   .manage__hint { color: var(--on-dark-faint); font-size: 0.85rem; margin: 0.5rem 0 1.3rem; }
   .manage__msg { color: var(--on-dark-faint); font-size: 0.9rem; padding: 1rem 0; }
   /* .upl li/.upl__name/.upl__badge/.upl__thumb zijn JS-aangemaakt -> is:global hieronder. */
@@ -136,6 +142,7 @@ const locOpts = locations.map((l) => ({ slug: l.slug, name: l.name }));
   .manage .mrow__del:hover { color: #ff9a91; border-color: #ff9a91; }
   .manage .mrow__status { grid-column: 1 / -1; font-size: 0.75rem; color: var(--on-dark-faint); }
   .manage .mrow__status:empty { display: none; }
+  .manage .mrow.is-dirty { border-color: var(--red); }
 </style>
 
 <script>
@@ -298,6 +305,26 @@ const locOpts = locations.map((l) => ({ slug: l.slug, name: l.name }));
     }
   }
 
+  const saveAllBtn = document.querySelector<HTMLButtonElement>('[data-saveall]')!;
+
+  function rowValues(row: HTMLElement) {
+    return {
+      caption: (row.querySelector('.mrow__cap') as HTMLInputElement).value,
+      location: (row.querySelector('.mrow__loc') as HTMLSelectElement).value,
+    };
+  }
+  function updateSaveAll() {
+    const n = manageEl.querySelectorAll('.mrow.is-dirty').length;
+    saveAllBtn.disabled = n === 0;
+    saveAllBtn.textContent = n ? `Alles opslaan (${n})` : 'Alles opslaan';
+  }
+  function checkDirty(row: HTMLElement) {
+    const orig = (row as any)._orig;
+    const cur = rowValues(row);
+    row.classList.toggle('is-dirty', cur.caption !== orig.caption || cur.location !== orig.location);
+    updateSaveAll();
+  }
+
   function mRow(it: any) {
     const row = document.createElement('div');
     row.className = 'mrow';
@@ -310,31 +337,54 @@ const locOpts = locations.map((l) => ({ slug: l.slug, name: l.name }));
         `<input class="mrow__cap" type="text" maxlength="140" placeholder="Bijschrift…" value="${esc(it.caption)}" />` +
         `<select class="mrow__loc">${opts}</select>` +
       `</div>` +
-      `<div class="mrow__btns">` +
-        `<button type="button" class="mrow__save">Opslaan</button>` +
-        `<button type="button" class="mrow__del" title="Verwijderen">✕</button>` +
-      `</div>` +
+      `<button type="button" class="mrow__del" title="Verwijderen">✕</button>` +
       `<span class="mrow__status"></span>`;
+    (row as any)._item = it;
+    (row as any)._orig = { caption: it.caption || '', location: it.location || '' };
     const st = row.querySelector<HTMLElement>('.mrow__status')!;
-    row.querySelector('.mrow__save')!.addEventListener('click', async () => {
-      st.textContent = 'Opslaan…';
-      const ok = await mAction('update', it, {
-        caption: (row.querySelector('.mrow__cap') as HTMLInputElement).value,
-        location: (row.querySelector('.mrow__loc') as HTMLSelectElement).value,
-      });
-      st.textContent = ok === true ? 'Opgeslagen ✓ (galerij ververst binnen enkele minuten)' : String(ok);
-    });
+    row.querySelector('.mrow__cap')!.addEventListener('input', () => checkDirty(row));
+    row.querySelector('.mrow__loc')!.addEventListener('change', () => checkDirty(row));
     row.querySelector('.mrow__del')!.addEventListener('click', async () => {
       if (!confirm('Deze media definitief verwijderen uit Cloudinary?')) return;
       st.textContent = 'Verwijderen…';
       const ok = await mAction('delete', it, {});
-      if (ok === true) row.remove();
+      if (ok === true) { row.remove(); updateSaveAll(); }
       else st.textContent = String(ok);
     });
     return row;
   }
 
+  async function saveAll() {
+    const dirty = Array.from(manageEl.querySelectorAll('.mrow.is-dirty')) as HTMLElement[];
+    if (!dirty.length) return;
+    if (!pwInput.value) {
+      dirty.forEach((row) => { (row.querySelector('.mrow__status') as HTMLElement).textContent = 'vul het wachtwoord hierboven in'; });
+      return;
+    }
+    saveAllBtn.disabled = true;
+    saveAllBtn.textContent = 'Opslaan…';
+    let ok = 0;
+    for (const row of dirty) {
+      const st = row.querySelector('.mrow__status') as HTMLElement;
+      const vals = rowValues(row);
+      st.textContent = 'Opslaan…';
+      const res = await mAction('update', (row as any)._item, vals);
+      if (res === true) {
+        ok++;
+        (row as any)._orig = { caption: vals.caption, location: vals.location };
+        (row as any)._item.caption = vals.caption;
+        (row as any)._item.location = vals.location;
+        row.classList.remove('is-dirty');
+        st.textContent = 'Opgeslagen ✓';
+      } else {
+        st.textContent = String(res);
+      }
+    }
+    updateSaveAll();
+  }
+
   async function loadManage() {
+    saveAllBtn.hidden = true;
     manageEl.innerHTML = '<p class="manage__msg">Laden…</p>';
     let items: any[] = [];
     try {
@@ -355,8 +405,11 @@ const locOpts = locations.map((l) => ({ slug: l.slug, name: l.name }));
     }
     manageEl.innerHTML = '';
     items.forEach((it) => manageEl.appendChild(mRow(it)));
+    saveAllBtn.hidden = false;
+    updateSaveAll();
   }
 
+  saveAllBtn.addEventListener('click', saveAll);
   document.querySelector('[data-refresh]')?.addEventListener('click', loadManage);
   loadManage();
 </script>
