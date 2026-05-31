@@ -3,9 +3,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { CLOUDINARY } from '../consts';
-import { locations } from '../data/locations';
+import { locations, LOCATION_COLORS } from '../data/locations';
 
 const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
+const locColors = LOCATION_COLORS;
 ---
 
 <BaseLayout
@@ -22,12 +23,30 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
     <div class="container--wide">
       <!-- Filters -->
       <div class="g-bar" data-bar hidden>
-        <div class="g-filters">
-          <button class="g-chip is-active" data-filter="all">Alles</button>
-          <button class="g-chip" data-filter="image" data-foto hidden>Foto's</button>
-          <button class="g-chip" data-filter="video" data-video hidden>Video's</button>
+        <div class="g-frow">
+          <span class="g-flabel">Soort</span>
+          <div class="g-chips" data-group="type">
+            <button class="g-chip is-active" data-filter="type" data-value="">Alles</button>
+            <button class="g-chip" data-filter="type" data-value="image" data-foto hidden>Foto's</button>
+            <button class="g-chip" data-filter="type" data-value="video" data-video hidden>Video's</button>
+          </div>
         </div>
-        <p class="g-count"><b data-count>0</b> <span>items</span></p>
+        <div class="g-frow" data-locrow hidden>
+          <span class="g-flabel">Locatie</span>
+          <div class="g-chips" data-group="location">
+            <button class="g-chip is-active" data-filter="location" data-value="">Alle</button>
+          </div>
+        </div>
+        <div class="g-frow" data-yearrow hidden>
+          <span class="g-flabel">Periode</span>
+          <div class="g-chips" data-group="year">
+            <button class="g-chip is-active" data-filter="year" data-value="">Alle</button>
+          </div>
+        </div>
+        <div class="g-barfoot">
+          <p class="g-count"><b data-count>0</b> <span>items</span></p>
+          <button class="g-reset" data-reset hidden>Wis filters ✕</button>
+        </div>
       </div>
 
       <!-- Laadstaat -->
@@ -44,6 +63,7 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
 
       <!-- Grid (client-side gevuld) -->
       <div class="g-grid" data-grid></div>
+      <p class="g-none" data-none hidden>Geen resultaten met deze filters. <button class="g-linklike" data-reset>Wis de filters</button></p>
     </div>
   </section>
 
@@ -66,17 +86,18 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
 </BaseLayout>
 
 <style>
-  .g-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.6rem; }
-  .g-filters { display: flex; flex-wrap: wrap; gap: 0.45rem; }
-  .g-chip {
-    font-weight: 700; font-size: 0.82rem; padding: 0.45rem 1rem; border-radius: 100px;
-    border: 1px solid var(--line-dark); color: var(--on-dark-soft); background: var(--panel);
-    transition: all 0.18s var(--ease);
-  }
-  .g-chip:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
-  .g-chip.is-active { background: var(--red); border-color: var(--red); color: #fff; }
+  .g-bar { display: flex; flex-direction: column; gap: 1.1rem; margin-bottom: 1.8rem; }
+  .g-frow { display: grid; gap: 0.5rem; }
+  .g-flabel { font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.66rem; color: var(--on-dark-faint); }
+  .g-chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .g-barfoot { display: flex; align-items: center; gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-dark); }
   .g-count b { font-family: var(--font-display); font-size: 1.3rem; color: var(--red); }
   .g-count span { color: var(--on-dark-soft); font-size: 0.88rem; }
+  .g-reset { margin-left: auto; color: var(--on-dark-soft); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.74rem; }
+  .g-reset:hover { color: var(--red); }
+  .g-none { text-align: center; padding: 3rem 1rem; color: var(--on-dark-faint); font-size: 1rem; }
+  .g-linklike { color: var(--on-dark-soft); text-decoration: underline; font-weight: 700; }
+  .g-linklike:hover { color: var(--red); }
 
   /* Het hidden-attribuut moet winnen van de display:flex-regels hieronder
      (anders blijven loader/lege-staat/lightbox zichtbaar en blokkeert de lightbox kliks). */
@@ -120,6 +141,15 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
 <!-- JS-aangemaakte elementen (tegels, play-overlay, lightbox-media) krijgen geen
      scoped styles; daarom hier globaal, genamespaced onder .g-grid / .lb. -->
 <style is:global>
+  /* Filterchips: locatie/periode-chips worden via JS aangemaakt -> globaal. */
+  .g-bar .g-chip { font-weight: 700; font-size: 0.82rem; padding: 0.45rem 0.95rem; border-radius: 100px; border: 1px solid var(--line-dark); color: var(--on-dark-soft); background: var(--panel); transition: all 0.18s var(--ease); white-space: nowrap; cursor: pointer; }
+  .g-bar .g-chip:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+  .g-bar .g-chip.is-active { background: var(--red); border-color: var(--red); color: #fff; }
+  .g-bar .g-chip--loc { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .g-bar .g-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); flex: none; }
+  .g-bar .g-chip--loc.is-active { background: var(--c); border-color: var(--c); color: #0B1220; }
+  .g-bar .g-chip--loc.is-active .g-dot { background: rgba(11,18,32,0.5); }
+
   .g-grid .g-item {
     display: block; width: 100%; margin: 0 0 0.9rem; padding: 0;
     position: relative; overflow: hidden; border-radius: var(--radius);
@@ -139,7 +169,7 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
   .lb .lb__stage img, .lb .lb__stage video { max-width: 94vw; max-height: 86vh; width: auto; height: auto; border-radius: 6px; display: block; box-shadow: 0 30px 80px -30px #000; }
 </style>
 
-<script define:vars={{ cloud: CLOUDINARY.cloud, tag: CLOUDINARY.tag, locMap }}>
+<script define:vars={{ cloud: CLOUDINARY.cloud, tag: CLOUDINARY.tag, locMap, locColors }}>
   const RES = `https://res.cloudinary.com/${cloud}`;
   const grid = document.querySelector('[data-grid]');
   const bar = document.querySelector('[data-bar]');
@@ -148,8 +178,11 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
   const countEl = document.querySelector('[data-count]');
   const fotoChip = document.querySelector('[data-foto]');
   const videoChip = document.querySelector('[data-video]');
+  const noneEl = document.querySelector('[data-none]');
+  const resetBtn = document.querySelector('[data-reset]');
   let items = [];
   let visible = [];
+  const state = { type: '', location: '', year: '' };
 
   const tx = (type, t, it, ext) =>
     `${RES}/${type}/upload/${t}/v${it.version}/${encodeURI(it.publicId)}.${ext}`;
@@ -168,6 +201,11 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
     } catch (e) {
       return '';
     }
+  }
+
+  function yearOf(iso) {
+    const m = iso ? String(iso).match(/^(\d{4})/) : null;
+    return m ? m[1] : '';
   }
 
   // Primair: backend-functie (rijke metadata: locatie, datum, bijschrift).
@@ -219,6 +257,8 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
       btn.className = 'g-item';
       btn.type = 'button';
       btn.dataset.type = it.type;
+      btn.dataset.loc = it.location || '';
+      btn.dataset.year = yearOf(it.createdAt) || '';
       btn.dataset.index = String(i);
       btn.style.setProperty('--ar', `${it.width} / ${it.height}`);
       btn.setAttribute('aria-label', it.type === 'video' ? 'Video afspelen' : 'Foto bekijken');
@@ -245,14 +285,57 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
     });
   }
 
-  function applyFilter(f) {
+  function apply() {
     visible = [];
     grid.querySelectorAll('.g-item').forEach((el) => {
-      const ok = f === 'all' || el.dataset.type === f;
+      const ok =
+        (!state.type || el.dataset.type === state.type) &&
+        (!state.location || el.dataset.loc === state.location) &&
+        (!state.year || el.dataset.year === state.year);
       el.classList.toggle('is-hidden', !ok);
       if (ok) visible.push(Number(el.dataset.index));
     });
     countEl.textContent = String(visible.length);
+    const active = !!(state.type || state.location || state.year);
+    if (resetBtn) resetBtn.hidden = !active;
+    if (noneEl) noneEl.hidden = visible.length !== 0;
+  }
+
+  function buildFilterChips() {
+    // Locatie-chips: alleen locaties die echt voorkomen, met hun kleur.
+    const locGroup = document.querySelector('[data-group="location"]');
+    Object.keys(locMap)
+      .filter((slug) => items.some((it) => it.location === slug))
+      .forEach((slug) => {
+        const b = document.createElement('button');
+        b.className = 'g-chip g-chip--loc';
+        b.dataset.filter = 'location';
+        b.dataset.value = slug;
+        b.style.setProperty('--c', locColors[slug] || 'var(--red)');
+        b.innerHTML = `<span class="g-dot"></span>${locMap[slug]}`;
+        locGroup.appendChild(b);
+        document.querySelector('[data-locrow]').hidden = false;
+      });
+
+    // Periode-chips: aanwezige jaren (uit de uploaddatum), aflopend.
+    const yearGroup = document.querySelector('[data-group="year"]');
+    [...new Set(items.map((it) => yearOf(it.createdAt)).filter(Boolean))]
+      .sort((a, b) => Number(b) - Number(a))
+      .forEach((y) => {
+        const b = document.createElement('button');
+        b.className = 'g-chip';
+        b.dataset.filter = 'year';
+        b.dataset.value = y;
+        b.textContent = y;
+        yearGroup.appendChild(b);
+        document.querySelector('[data-yearrow]').hidden = false;
+      });
+  }
+
+  function resetFilters() {
+    state.type = ''; state.location = ''; state.year = '';
+    bar.querySelectorAll('.g-chip').forEach((c) => c.classList.toggle('is-active', c.dataset.value === ''));
+    apply();
   }
 
   // ---- Lightbox ----
@@ -316,13 +399,16 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
     else if (e.key === 'ArrowRight' && visible.length > 1) showAt(lbPos + 1);
   });
 
-  // Filterknoppen
-  document.querySelectorAll('.g-chip').forEach((chip) =>
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.g-chip').forEach((c) => c.classList.toggle('is-active', c === chip));
-      applyFilter(chip.dataset.filter);
-    })
-  );
+  // Filterchips: gedelegeerd, zodat ook dynamisch toegevoegde locatie/periode-chips werken.
+  bar.addEventListener('click', (e) => {
+    const chip = e.target.closest('.g-chip');
+    if (!chip || !chip.dataset.filter) return;
+    const dim = chip.dataset.filter;
+    state[dim] = chip.dataset.value;
+    bar.querySelectorAll(`.g-chip[data-filter="${dim}"]`).forEach((c) => c.classList.toggle('is-active', c === chip));
+    apply();
+  });
+  document.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', resetFilters));
 
   // ---- Init ----
   (async () => {
@@ -335,6 +421,7 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
     bar.hidden = false;
     if (items.some((x) => x.type === 'image')) fotoChip.hidden = false;
     if (items.some((x) => x.type === 'video')) videoChip.hidden = false;
-    applyFilter('all');
+    buildFilterChips();
+    apply();
   })();
 </script>
