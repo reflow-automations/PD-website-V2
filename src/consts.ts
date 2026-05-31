@@ -43,6 +43,17 @@ export const FORM_ENDPOINT = '';
 // n8n-webhook voor de chatbot (AI agent met PD-kennis, GPT-4.1-mini).
 export const CHAT_WEBHOOK = 'https://n8n.reflowautomations.nl/webhook/pd-chat';
 
+// Cloudinary media-galerij — volledig publiek, GEEN API-key/secret nodig.
+// De galerij haalt media client-side op via Cloudinary's "list"-endpoint.
+// Beheer (eenmalig in Cloudinary):
+//   1. Settings > Security > zet "Resource list" aan (sta de list-delivery toe).
+//   2. Geef galerij-media de tag hieronder (`pd-gallery`) bij het uploaden.
+// Daarna verschijnt nieuwe media vanzelf op /galerij/ (CDN-cache ~enkele minuten).
+export const CLOUDINARY = {
+  cloud: 'duduaq6hw',
+  tag: 'pd-gallery',
+};
+
 export type NavItem = { label: string; href: string };
 
 export const NAV: NavItem[] = [
@@ -51,6 +62,7 @@ export const NAV: NavItem[] = [
   { label: 'Locaties', href: '/locaties/' },
   { label: 'Kinderfeestjes', href: '/kinderfeestjes/' },
   { label: 'Zakelijk', href: '/zakelijk/' },
+  { label: 'Galerij', href: '/galerij/' },
   { label: 'Over ons', href: '/over-ons/' },
   { label: 'FAQ', href: '/faq/' },
   { label: 'Contact', href: '/contact/' },
@@ -62,6 +74,7 @@ export const FOOTER_LINKS = {
     { label: 'Lessen', href: '/lessen/' },
     { label: 'Lesrooster', href: '/lesrooster/' },
     { label: 'Locaties', href: '/locaties/' },
+    { label: 'Galerij', href: '/galerij/' },
     { label: 'Over ons', href: '/over-ons/' },
     { label: 'Veelgestelde vragen', href: '/faq/' },
   ],
