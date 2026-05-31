@@ -16,21 +16,25 @@ const groups = [
   {
     title: 'Voor kids',
     age: '6-16 jaar',
+    filter: 'kinderen',
     text: 'Freerunninglessen speciaal ontworpen voor kinderen en tieners tot 16 jaar. De perfecte kans om spelenderwijs je fysieke vaardigheden te ontwikkelen en nieuwe bewegingen te leren. Of je nu een beginner bent of al enige ervaring hebt: in een veilige en ondersteunende setting werk je aan kracht, behendigheid en creativiteit, terwijl je plezier hebt en deel uitmaakt van een enthousiaste, jonge gemeenschap.',
   },
   {
     title: 'Voor jongeren',
     age: '16-21 jaar',
+    filter: 'jeugd',
     text: 'Lessen speciaal afgestemd op jongeren, ideaal om je fysieke grenzen te verkennen en te verleggen terwijl je nieuwe vaardigheden leert. Of je nu net begint of je skills wilt aanscherpen: een perfecte balans tussen uitdaging en plezier, samen met leeftijdsgenoten die dezelfde passie delen.',
   },
   {
     title: 'Voor volwassenen',
     age: '21+ jaar',
+    filter: 'volwassenen',
     text: 'Freerunninglessen speciaal ontworpen voor volwassenen. Ongeacht of je nieuw bent of je bestaande vaardigheden wilt verbeteren: een stimulerende mix van uitdaging en plezier. In een ondersteunende, energieke omgeving werk je aan kracht, behendigheid en creativiteit, als onderdeel van een gemotiveerde gemeenschap.',
   },
   {
     title: 'Voor 65+',
     age: 'vanaf 65 jaar',
+    filter: 'senioren',
     text: 'Lessen speciaal aangepast voor de 65-plusser, met focus op valpreventie en stabiliteit. Een aangename mix van lichte uitdaging en veel plezier: in een veilige omgeving werken we aan balans, coördinatie en kracht, cruciaal voor een gezonde, mobiele levensstijl.',
   },
 ];
@@ -79,13 +83,17 @@ const groups = [
       </div>
       <div class="groups">
         {groups.map((g) => (
-          <article class="grp reveal">
+          <a class="grp reveal" href={`/lesrooster/?leeftijd=${g.filter}`} data-age={g.filter}>
             <div class="grp__head">
               <h3 class="grp__title">{g.title}</h3>
               <span class="grp__age">{g.age}</span>
             </div>
             <p class="grp__text">{g.text}</p>
-          </article>
+            <span class="grp__cta">
+              Bekijk de lestijden
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="18" height="18"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </span>
+          </a>
         ))}
       </div>
       <p class="groups__note">Ook peuters & kleuters (2-6 jaar) kunnen bij ons terecht, bekijk de lestijden hieronder.</p>
@@ -118,11 +126,48 @@ const groups = [
   @media (min-width: 760px) { .learn { grid-template-columns: repeat(3, 1fr); } }
 
   .groups { display: grid; gap: 1.2rem; grid-template-columns: 1fr; }
-  .grp { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 1.6rem; }
+  .grp {
+    display: flex; flex-direction: column;
+    background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 1.6rem;
+    position: relative; overflow: hidden; isolation: isolate;
+    transition: transform 0.25s var(--ease), border-color 0.25s, background 0.25s;
+  }
+  .grp::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; z-index: -1;
+    background: var(--red); transform: scaleY(0); transform-origin: top; transition: transform 0.3s var(--ease);
+  }
+  .grp:hover { transform: translateY(-4px); border-color: rgba(229, 57, 47, 0.5); background: #131c2e; }
+  .grp:hover::before { transform: scaleY(1); }
+  .grp:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
   .grp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.7rem; }
-  .grp__title { font-size: 1.6rem; }
+  .grp__title { font-size: 1.6rem; color: #fff; }
   .grp__age { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--red); white-space: nowrap; }
   .grp__text { color: var(--on-dark-soft); font-size: 0.95rem; }
+  .grp__cta {
+    margin-top: 1.1rem; display: inline-flex; align-items: center; gap: 0.4rem;
+    font-weight: 800; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--red);
+  }
+  .grp__cta svg { transition: transform 0.25s var(--ease); }
+  .grp:hover .grp__cta svg { transform: translateX(4px); }
   .groups__note { color: var(--on-dark-faint); font-size: 0.9rem; margin-top: 1.4rem; }
   @media (min-width: 820px) { .groups { grid-template-columns: repeat(2, 1fr); } }
 </style>
+
+<script>
+  // Groep-kaarten filteren het rooster hieronder direct (zonder paginawissel).
+  // Fallback: de href navigeert naar /lesrooster/?leeftijd=... als het rooster ontbreekt.
+  document.querySelectorAll<HTMLAnchorElement>('.grp[data-age]').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      const age = card.dataset.age;
+      const rooster = document.querySelector<HTMLElement>('#rooster');
+      const chip = rooster?.querySelector<HTMLButtonElement>(
+        `.chip[data-filter="age"][data-value="${age}"]`
+      );
+      if (rooster && chip) {
+        e.preventDefault();
+        chip.click();
+        rooster.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+</script>
