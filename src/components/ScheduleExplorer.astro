@@ -143,7 +143,8 @@ const total = entries.length;
   (() => {
     const root = document.querySelector('[data-rooster]') as HTMLElement | null;
     if (!root) return;
-    const state = { loc: '', age: '', dag: '' };
+    // Multi-select: per dimensie een set. Leeg = "Alle". Binnen rij = OF, tussen rijen = EN.
+    const state: Record<string, Set<string>> = { loc: new Set(), age: new Set(), dag: new Set() };
     const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('.chip'));
     const classes = Array.from(root.querySelectorAll<HTMLElement>('.cls'));
     const cols = Array.from(root.querySelectorAll<HTMLElement>('.daycol'));
@@ -151,63 +152,77 @@ const total = entries.length;
     const resetBtn = root.querySelector<HTMLElement>('.rooster__reset');
     const noneEl = root.querySelector<HTMLElement>('[data-none]');
 
+    function syncChips(filter: string) {
+      const set = state[filter];
+      chips
+        .filter((ch) => ch.dataset.filter === filter)
+        .forEach((ch) => {
+          const v = ch.dataset.value!;
+          ch.classList.toggle('is-active', v === '' ? set.size === 0 : set.has(v));
+        });
+    }
+
     function apply() {
       let visible = 0;
       classes.forEach((c) => {
         const ok =
-          (!state.loc || c.dataset.loc === state.loc) &&
-          (!state.age || c.dataset.age === state.age) &&
-          (!state.dag || c.dataset.dag === state.dag);
+          (state.loc.size === 0 || state.loc.has(c.dataset.loc!)) &&
+          (state.age.size === 0 || state.age.has(c.dataset.age!)) &&
+          (state.dag.size === 0 || state.dag.has(c.dataset.dag!));
         c.hidden = !ok;
         if (ok) visible++;
       });
       cols.forEach((col) => {
-        const dayMatch = !state.dag || col.dataset.day === state.dag;
+        const dayMatch = state.dag.size === 0 || state.dag.has(col.dataset.day!);
         const hasVisible = col.querySelector('.cls:not([hidden])');
         col.hidden = !dayMatch || !hasVisible;
         const empty = col.querySelector<HTMLElement>('.daycol__empty');
         if (empty) empty.hidden = !!hasVisible;
       });
       if (countEl) countEl.textContent = String(visible);
-      root.classList.toggle('single-loc', !!state.loc);
-      const active = !!(state.loc || state.age || state.dag);
+      root.classList.toggle('single-loc', state.loc.size === 1);
+      const active = state.loc.size > 0 || state.age.size > 0 || state.dag.size > 0;
       if (resetBtn) resetBtn.hidden = !active;
       if (noneEl) noneEl.hidden = visible !== 0;
     }
 
-    function setActive(filter: string, value: string) {
-      (state as any)[filter] = value;
-      chips
-        .filter((ch) => ch.dataset.filter === filter)
-        .forEach((ch) => ch.classList.toggle('is-active', ch.dataset.value === value));
+    function toggle(filter: string, value: string) {
+      const set = state[filter];
+      if (value === '') set.clear();          // "Alle" -> wis deze dimensie
+      else if (set.has(value)) set.delete(value);
+      else set.add(value);
+      syncChips(filter);
       apply();
     }
 
     chips.forEach((ch) =>
-      ch.addEventListener('click', () => setActive(ch.dataset.filter!, ch.dataset.value!))
+      ch.addEventListener('click', () => toggle(ch.dataset.filter!, ch.dataset.value!))
     );
     root.querySelectorAll('[data-reset]').forEach((b) =>
       b.addEventListener('click', () => {
-        setActive('loc', '');
-        setActive('age', '');
-        setActive('dag', '');
+        state.loc.clear(); state.age.clear(); state.dag.clear();
+        syncChips('loc'); syncChips('age'); syncChips('dag');
+        apply();
       })
     );
 
-    // Pre-filter via ?locatie=slug en/of ?leeftijd=key
+    // Pre-filter via ?locatie= en/of ?leeftijd= (mag komma-gescheiden voor meerdere)
     const params = new URLSearchParams(location.search);
-    const loc = params.get('locatie');
-    const age = params.get('leeftijd');
     let preset = false;
-    if (loc && chips.some((c) => c.dataset.filter === 'loc' && c.dataset.value === loc)) {
-      setActive('loc', loc);
-      preset = true;
-    }
-    if (age && chips.some((c) => c.dataset.filter === 'age' && c.dataset.value === age)) {
-      setActive('age', age);
-      preset = true;
-    }
+    const presetDim = (param: string, filter: string) => {
+      const raw = params.get(param);
+      if (!raw) return;
+      raw.split(',').forEach((v) => {
+        if (chips.some((c) => c.dataset.filter === filter && c.dataset.value === v)) {
+          state[filter].add(v);
+          preset = true;
+        }
+      });
+      syncChips(filter);
+    };
+    presetDim('locatie', 'loc');
+    presetDim('leeftijd', 'age');
+    apply();
     if (preset) root.scrollIntoView({ behavior: 'auto', block: 'start' });
-    else apply();
   })();
 </script>
