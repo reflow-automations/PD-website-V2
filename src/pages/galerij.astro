@@ -3,6 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import CtaBand from '../components/CtaBand.astro';
 import { CLOUDINARY } from '../consts';
+import { locations } from '../data/locations';
+
+const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
 ---
 
 <BaseLayout
@@ -58,6 +61,7 @@ import { CLOUDINARY } from '../consts';
     <button class="lb__nav lb__next" data-lb-next aria-label="Volgende">
       <svg viewBox="0 0 24 24" width="30" height="30" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
+    <p class="lb__cap" data-lb-cap hidden></p>
   </div>
 </BaseLayout>
 
@@ -115,6 +119,13 @@ import { CLOUDINARY } from '../consts';
   .g-item:hover .g-play span { transform: scale(1.08); }
   .g-play svg { color: #fff; margin-left: 3px; }
 
+  .g-meta {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 1.4rem 0.7rem 0.5rem;
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #fff; line-height: 1.2; pointer-events: none;
+    background: linear-gradient(to top, rgba(11,18,32,0.82), transparent);
+  }
+
   /* Lightbox */
   .lb { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: rgba(6,10,18,0.92); backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.25s; }
   .lb.is-open { opacity: 1; }
@@ -127,13 +138,15 @@ import { CLOUDINARY } from '../consts';
   .lb__prev { left: 1rem; }
   .lb__next { right: 1rem; }
   .lb__nav[hidden] { display: none; }
+  .lb__cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.1rem 1.4rem; text-align: center; color: #fff; font-size: 0.9rem; font-weight: 600; letter-spacing: 0.01em; background: linear-gradient(to top, rgba(6,10,18,0.85), transparent); pointer-events: none; }
+  .lb__cap[hidden] { display: none; }
   @media (max-width: 600px) {
     .lb__nav { width: 2.6rem; height: 2.6rem; background: rgba(255,255,255,0.12); }
     .lb__prev { left: 0.4rem; } .lb__next { right: 0.4rem; }
   }
 </style>
 
-<script define:vars={{ cloud: CLOUDINARY.cloud, tag: CLOUDINARY.tag }}>
+<script define:vars={{ cloud: CLOUDINARY.cloud, tag: CLOUDINARY.tag, locMap }}>
   const RES = `https://res.cloudinary.com/${cloud}`;
   const grid = document.querySelector('[data-grid]');
   const bar = document.querySelector('[data-bar]');
@@ -154,11 +167,35 @@ import { CLOUDINARY } from '../consts';
   const fullImg = (it) => tx('image', 'c_limit,w_1800,f_auto,q_auto', it, it.format);
   const videoSrc = (it) => tx('video', 'q_auto', it, 'mp4');
 
-  async function fetchList(type) {
+  function fmtDate(iso) {
+    if (!iso) return '';
+    try {
+      const s = new Date(iso).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // Primair: backend-functie (rijke metadata: locatie, datum, bijschrift).
+  async function fetchFromApi() {
+    try {
+      const r = await fetch('/api/gallery');
+      if (!r.ok) return null;
+      const d = await r.json();
+      if (!d || d.configured === false) return null;
+      return d.items || [];
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Fallback: publieke list-endpoint (geen secret nodig, alleen basis + datum).
+  async function listOne(type) {
     try {
       const r = await fetch(`${RES}/${type}/list/${tag}.json`, { mode: 'cors' });
       if (!r.ok) {
-        console.warn(`[galerij] ${type}-lijst gaf HTTP ${r.status}. Check: (1) staat "Resource list" aan in Cloudinary (Settings > Security)? (2) is er media getagd met "${tag}"?`);
+        console.warn(`[galerij] ${type}-lijst gaf HTTP ${r.status}. Zet env-vars in Vercel (dan gebruikt 'ie /api/gallery), of zet "Resource list" aan in Cloudinary + tag media met "${tag}".`);
         return [];
       }
       const data = await r.json();
@@ -169,11 +206,17 @@ import { CLOUDINARY } from '../consts';
         format: res.format,
         width: res.width || 4,
         height: res.height || 3,
+        createdAt: res.created_at || null,
+        location: null,
+        caption: null,
       }));
     } catch (e) {
-      console.warn(`[galerij] kon ${type}-lijst niet laden. Staat "Resource list" aan in Cloudinary (Settings > Security) en is de media getagd met "${tag}"?`, e);
       return [];
     }
+  }
+  async function fetchFromList() {
+    const [imgs, vids] = await Promise.all([listOne('image'), listOne('video')]);
+    return [...imgs, ...vids];
   }
 
   function render() {
@@ -196,6 +239,13 @@ import { CLOUDINARY } from '../consts';
         play.className = 'g-play';
         play.innerHTML = '<span><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>';
         btn.appendChild(play);
+      }
+      const locName = it.location && locMap[it.location] ? locMap[it.location] : null;
+      if (locName) {
+        const meta = document.createElement('span');
+        meta.className = 'g-meta';
+        meta.textContent = locName;
+        btn.appendChild(meta);
       }
       btn.addEventListener('click', () => openLb(i));
       grid.appendChild(btn);
@@ -234,6 +284,14 @@ import { CLOUDINARY } from '../consts';
       img.src = fullImg(it); img.alt = 'Parkour Disciplines galerij';
       stage.appendChild(img);
     }
+    const cap = document.querySelector('[data-lb-cap]');
+    const parts = [];
+    if (it.caption) parts.push(it.caption);
+    if (it.location && locMap[it.location]) parts.push(locMap[it.location]);
+    const d = fmtDate(it.createdAt);
+    if (d) parts.push(d);
+    cap.textContent = parts.join('  ·  ');
+    cap.hidden = parts.length === 0;
     const multi = n > 1;
     prevBtn.hidden = !multi; nextBtn.hidden = !multi;
   }
@@ -275,14 +333,15 @@ import { CLOUDINARY } from '../consts';
 
   // ---- Init ----
   (async () => {
-    const [imgs, vids] = await Promise.all([fetchList('image'), fetchList('video')]);
-    items = [...imgs, ...vids].sort((a, b) => (b.version || 0) - (a.version || 0));
+    let list = await fetchFromApi();
+    if (!list) list = await fetchFromList();
+    items = (list || []).sort((a, b) => (b.version || 0) - (a.version || 0));
     loadingEl.hidden = true;
     if (!items.length) { emptyEl.hidden = false; return; }
     render();
     bar.hidden = false;
-    if (imgs.length) fotoChip.hidden = false;
-    if (vids.length) videoChip.hidden = false;
+    if (items.some((x) => x.type === 'image')) fotoChip.hidden = false;
+    if (items.some((x) => x.type === 'video')) videoChip.hidden = false;
     applyFilter('all');
   })();
 </script>
