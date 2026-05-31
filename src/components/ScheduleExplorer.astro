@@ -21,7 +21,11 @@ const total = entries.length;
         <button class="chip is-active" data-filter="loc" data-value="">Alle</button>
         {locations.map((l) => (
           <button class="chip chip--loc" data-filter="loc" data-value={l.slug} style={`--c:${LOCATION_COLORS[l.slug]}`}>
-            <span class="chip__dot"></span>{l.name}
+            <span class="chip__dot"></span>
+            <span class="chip__txt">
+              <span class="chip__name">{l.name}</span>
+              {!l.name.includes(l.city) && <span class="chip__city">{l.city}</span>}
+            </span>
           </button>
         ))}
       </div>
@@ -94,10 +98,14 @@ const total = entries.length;
   }
   .chip:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
   .chip.is-active { background: var(--red); border-color: var(--red); color: #fff; }
-  .chip--loc { display: inline-flex; align-items: center; gap: 0.45rem; }
+  .chip--loc { display: inline-flex; align-items: center; gap: 0.5rem; padding-block: 0.4rem; }
   .chip__dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--c); flex: none; }
+  .chip__txt { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.14; }
+  .chip__city { font-size: 0.64rem; font-weight: 600; letter-spacing: 0.01em; color: var(--on-dark-faint); }
+  .chip--loc:hover .chip__city { color: var(--on-dark-soft); }
   .chip--loc.is-active { background: var(--c); border-color: var(--c); color: #0B1220; }
   .chip--loc.is-active .chip__dot { background: rgba(11, 18, 32, 0.5); }
+  .chip--loc.is-active .chip__city { color: rgba(11, 18, 32, 0.62); }
 
   .rooster__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 1.6rem 0 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--line-dark); }
   .rooster__count b { font-family: var(--font-display); font-size: 1.5rem; color: var(--red); }
