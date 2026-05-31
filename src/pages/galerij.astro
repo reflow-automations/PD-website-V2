@@ -94,43 +94,14 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
   @media (min-width: 900px) { .g-grid { columns: 3; } }
   @media (min-width: 1300px) { .g-grid { columns: 4; } }
 
-  .g-item {
-    display: block; width: 100%; margin: 0 0 0.9rem; padding: 0;
-    position: relative; overflow: hidden; border-radius: var(--radius);
-    background: var(--panel); border: 1px solid var(--line-dark);
-    break-inside: avoid; cursor: pointer; line-height: 0;
-    transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s;
-  }
-  .g-item:hover { transform: translateY(-3px); border-color: rgba(229,57,47,0.5); box-shadow: 0 18px 40px -24px rgba(0,0,0,0.9); }
-  .g-item:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-  .g-item img { width: 100%; height: auto; display: block; aspect-ratio: var(--ar, 4 / 3); object-fit: cover; }
-  .g-item.is-hidden { display: none; }
-
-  .g-play {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    background: linear-gradient(to top, rgba(11,18,32,0.45), rgba(11,18,32,0.05));
-    pointer-events: none;
-  }
-  .g-play span {
-    width: 3.4rem; height: 3.4rem; border-radius: 50%; display: grid; place-items: center;
-    background: rgba(229,57,47,0.92); box-shadow: 0 6px 20px -6px rgba(0,0,0,0.6);
-    transition: transform 0.25s var(--ease);
-  }
-  .g-item:hover .g-play span { transform: scale(1.08); }
-  .g-play svg { color: #fff; margin-left: 3px; }
-
-  .g-meta {
-    position: absolute; left: 0; right: 0; bottom: 0; padding: 1.4rem 0.7rem 0.5rem;
-    font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
-    color: #fff; line-height: 1.2; pointer-events: none;
-    background: linear-gradient(to top, rgba(11,18,32,0.82), transparent);
-  }
+  /* .g-item / .g-play / .g-meta worden via JS aangemaakt -> styles staan in
+     het <style is:global> blok onderaan (scoped styles raken JS-elementen niet). */
 
   /* Lightbox */
   .lb { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: rgba(6,10,18,0.92); backdrop-filter: blur(6px); opacity: 0; transition: opacity 0.25s; }
   .lb.is-open { opacity: 1; }
   .lb__stage { max-width: min(94vw, 1300px); max-height: 86vh; display: flex; align-items: center; justify-content: center; }
-  .lb__stage img, .lb__stage video { max-width: 94vw; max-height: 86vh; width: auto; height: auto; border-radius: 6px; display: block; box-shadow: 0 30px 80px -30px #000; }
+  /* .lb__stage img/video zijn JS-aangemaakt -> styles in het is:global blok onderaan. */
   .lb__close { position: absolute; top: 1rem; right: 1rem; color: #fff; width: 3rem; height: 3rem; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.08); transition: background 0.2s; }
   .lb__close:hover { background: rgba(255,255,255,0.18); }
   .lb__nav { position: absolute; top: 50%; transform: translateY(-50%); color: #fff; width: 3.2rem; height: 3.2rem; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.08); transition: background 0.2s; }
@@ -144,6 +115,28 @@ const locMap = Object.fromEntries(locations.map((l) => [l.slug, l.name]));
     .lb__nav { width: 2.6rem; height: 2.6rem; background: rgba(255,255,255,0.12); }
     .lb__prev { left: 0.4rem; } .lb__next { right: 0.4rem; }
   }
+</style>
+
+<!-- JS-aangemaakte elementen (tegels, play-overlay, lightbox-media) krijgen geen
+     scoped styles; daarom hier globaal, genamespaced onder .g-grid / .lb. -->
+<style is:global>
+  .g-grid .g-item {
+    display: block; width: 100%; margin: 0 0 0.9rem; padding: 0;
+    position: relative; overflow: hidden; border-radius: var(--radius);
+    background: var(--panel); border: 1px solid var(--line-dark);
+    break-inside: avoid; cursor: pointer; line-height: 0;
+    transition: transform 0.25s var(--ease), border-color 0.25s, box-shadow 0.25s;
+  }
+  .g-grid .g-item:hover { transform: translateY(-3px); border-color: rgba(229,57,47,0.5); box-shadow: 0 18px 40px -24px rgba(0,0,0,0.9); }
+  .g-grid .g-item:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  .g-grid .g-item img { width: 100%; height: auto; display: block; aspect-ratio: var(--ar, 4 / 3); object-fit: cover; }
+  .g-grid .g-item.is-hidden { display: none; }
+  .g-grid .g-play { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(to top, rgba(11,18,32,0.45), rgba(11,18,32,0.05)); pointer-events: none; }
+  .g-grid .g-play span { width: 3.4rem; height: 3.4rem; border-radius: 50%; display: grid; place-items: center; background: rgba(229,57,47,0.92); box-shadow: 0 6px 20px -6px rgba(0,0,0,0.6); transition: transform 0.25s var(--ease); }
+  .g-grid .g-item:hover .g-play span { transform: scale(1.08); }
+  .g-grid .g-play svg { color: #fff; margin-left: 3px; }
+  .g-grid .g-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.4rem 0.7rem 0.5rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; line-height: 1.2; pointer-events: none; background: linear-gradient(to top, rgba(11,18,32,0.82), transparent); }
+  .lb .lb__stage img, .lb .lb__stage video { max-width: 94vw; max-height: 86vh; width: auto; height: auto; border-radius: 6px; display: block; box-shadow: 0 30px 80px -30px #000; }
 </style>
 
 <script define:vars={{ cloud: CLOUDINARY.cloud, tag: CLOUDINARY.tag, locMap }}>
