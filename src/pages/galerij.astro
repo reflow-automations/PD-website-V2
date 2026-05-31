@@ -19,7 +19,7 @@ const locColors = LOCATION_COLORS;
     intro="Foto's en video's van onze trainingen, events en de crew, verspreid over al onze locaties. Een indruk van wat freerunning bij Parkour Disciplines betekent."
   />
 
-  <section class="section section--ink">
+  <section class="section section--ink g-sec">
     <div class="container--wide">
       <!-- Filters (compacte dropdowns, naast elkaar; client-side opgebouwd) -->
       <div class="g-bar" data-bar hidden>
@@ -69,6 +69,8 @@ const locColors = LOCATION_COLORS;
 </BaseLayout>
 
 <style>
+  /* Minder loze ruimte tussen de hero en de filters. */
+  .g-sec { padding-top: clamp(1.25rem, 2vw, 2rem); }
   .g-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.8rem; padding-bottom: 1.1rem; border-bottom: 1px solid var(--line-dark); }
   .g-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
   .g-dd { position: relative; }
