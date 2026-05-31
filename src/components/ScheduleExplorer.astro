@@ -40,16 +40,6 @@ const total = entries.length;
         ))}
       </div>
     </div>
-
-    <div class="fgroup">
-      <span class="fgroup__label">Dag</span>
-      <div class="chips">
-        <button class="chip is-active" data-filter="dag" data-value="">Alle</button>
-        {DAGEN.map((d) => (
-          <button class="chip" data-filter="dag" data-value={d}>{d.slice(0, 2)}</button>
-        ))}
-      </div>
-    </div>
   </div>
 
   <div class="rooster__bar">
@@ -143,8 +133,9 @@ const total = entries.length;
   (() => {
     const root = document.querySelector('[data-rooster]') as HTMLElement | null;
     if (!root) return;
-    // Multi-select: per dimensie een set. Leeg = "Alle". Binnen rij = OF, tussen rijen = EN.
-    const state: Record<string, Set<string>> = { loc: new Set(), age: new Set(), dag: new Set() };
+    // Locatie = multi-select, leeftijd = single-select. Leeg = "Alle". Tussen rijen = EN.
+    const MULTI: Record<string, boolean> = { loc: true, age: false };
+    const state: Record<string, Set<string>> = { loc: new Set(), age: new Set() };
     const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('.chip'));
     const classes = Array.from(root.querySelectorAll<HTMLElement>('.cls'));
     const cols = Array.from(root.querySelectorAll<HTMLElement>('.daycol'));
@@ -167,30 +158,28 @@ const total = entries.length;
       classes.forEach((c) => {
         const ok =
           (state.loc.size === 0 || state.loc.has(c.dataset.loc!)) &&
-          (state.age.size === 0 || state.age.has(c.dataset.age!)) &&
-          (state.dag.size === 0 || state.dag.has(c.dataset.dag!));
+          (state.age.size === 0 || state.age.has(c.dataset.age!));
         c.hidden = !ok;
         if (ok) visible++;
       });
       cols.forEach((col) => {
-        const dayMatch = state.dag.size === 0 || state.dag.has(col.dataset.day!);
         const hasVisible = col.querySelector('.cls:not([hidden])');
-        col.hidden = !dayMatch || !hasVisible;
+        col.hidden = !hasVisible; // dagkolom verbergen als er geen lessen (meer) in zitten
         const empty = col.querySelector<HTMLElement>('.daycol__empty');
         if (empty) empty.hidden = !!hasVisible;
       });
       if (countEl) countEl.textContent = String(visible);
       root.classList.toggle('single-loc', state.loc.size === 1);
-      const active = state.loc.size > 0 || state.age.size > 0 || state.dag.size > 0;
+      const active = state.loc.size > 0 || state.age.size > 0;
       if (resetBtn) resetBtn.hidden = !active;
       if (noneEl) noneEl.hidden = visible !== 0;
     }
 
     function toggle(filter: string, value: string) {
       const set = state[filter];
-      if (value === '') set.clear();          // "Alle" -> wis deze dimensie
-      else if (set.has(value)) set.delete(value);
-      else set.add(value);
+      if (value === '') set.clear();              // "Alle" -> wis deze dimensie
+      else if (set.has(value)) set.delete(value); // actieve nogmaals -> uit
+      else { if (!MULTI[filter]) set.clear(); set.add(value); } // single-select: vervang
       syncChips(filter);
       apply();
     }
@@ -200,25 +189,21 @@ const total = entries.length;
     );
     root.querySelectorAll('[data-reset]').forEach((b) =>
       b.addEventListener('click', () => {
-        state.loc.clear(); state.age.clear(); state.dag.clear();
-        syncChips('loc'); syncChips('age'); syncChips('dag');
+        state.loc.clear(); state.age.clear();
+        syncChips('loc'); syncChips('age');
         apply();
       })
     );
 
-    // Pre-filter via ?locatie= en/of ?leeftijd= (mag komma-gescheiden voor meerdere)
+    // Pre-filter via ?locatie= (komma-lijst = meerdere) en ?leeftijd= (één)
     const params = new URLSearchParams(location.search);
     let preset = false;
     const presetDim = (param: string, filter: string) => {
       const raw = params.get(param);
       if (!raw) return;
-      raw.split(',').forEach((v) => {
-        if (chips.some((c) => c.dataset.filter === filter && c.dataset.value === v)) {
-          state[filter].add(v);
-          preset = true;
-        }
-      });
-      syncChips(filter);
+      const vals = raw.split(',').filter((v) => chips.some((c) => c.dataset.filter === filter && c.dataset.value === v));
+      (MULTI[filter] ? vals : vals.slice(0, 1)).forEach((v) => state[filter].add(v));
+      if (vals.length) { preset = true; syncChips(filter); }
     };
     presetDim('locatie', 'loc');
     presetDim('leeftijd', 'age');
