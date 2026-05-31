@@ -71,7 +71,8 @@ export const locations: Location[] = [
     address: { street: 'Kalkovenweg 7', postcode: '2401 LJ', city: 'Alphen aan den Rijn' },
     intro:
       'De Hero Academy in Alphen aan den Rijn is onze nieuwste aanwinst. Deze faciliteit is ontworpen voor een optimale trainingsomgeving voor Parkour & Freerunning. Met focus op kwaliteit en veiligheid, moderne apparatuur en ervaren coaches is dit een centrale ontmoetingsplek voor onze community.',
-    photo: 'indoor-precision.jpg',
+    photo: 'loc-hero.jpg',
+    imgPos: '50% 45%',
     bookHref: 'https://hero-academy.trainin.app/',
     openingstijden: [
       { dag: 'Maandag', tijd: '16:00 - 21:00' },
@@ -132,7 +133,7 @@ export const locations: Location[] = [
     address: { street: 'Amerikaweg 135', postcode: '2717 AV', city: 'Zoetermeer' },
     intro:
       'Gymworld Freerun Academy in Zoetermeer is onze grootste locatie. Een uitgebreid aanbod aan Parkour- en Freerunning-faciliteiten, geschikt voor alle niveaus. Als kern van onze community in Zoetermeer staat hier passie voor beweging centraal, elke training is uitdagend én veilig.',
-    photo: 'group-65plus.jpg',
+    photo: 'loc-gymworld.jpg',
     bookHref: 'https://gymworld-freerun-academy.trainin.app/',
     openingstijden: [
       { dag: 'Maandag', tijd: '16:00 - 21:15' },
@@ -207,8 +208,7 @@ export const locations: Location[] = [
     address: { street: 'De Warande', postcode: null, city: 'Zoetermeer' },
     intro:
       'Roots Academy Zoetermeer is onze unieke outdoor trainingslocatie, trainen in de open lucht met diverse uitdagingen in de natuurlijke omgeving. Bij slecht weer verplaatsen de trainingen naar onze "geheime" hybride binnenlocatie, zodat trainingen altijd doorgaan.',
-    photo: 'backflip-sky.jpg',
-    imgPos: '50% 32%',
+    photo: 'loc-roots.jpg',
     bookHref: 'https://roots-academy.trainin.app/',
     openingstijden: [
       { dag: 'Maandag', tijd: '20:30 - 21:30' },
@@ -272,8 +272,7 @@ export const locations: Location[] = [
     address: { street: 'Lopsenstraat 2', postcode: '2312 ZZ', city: 'Leiden' },
     intro:
       'Bij Play Freerun Academy vlak bij het centrum van Leiden trainen liefhebbers van alle leeftijden in een dynamische omgeving met verplaatsbare obstakels. De indeling verandert regelmatig en biedt steeds nieuwe uitdagingen, perfect om je vaardigheden te blijven ontwikkelen.',
-    photo: 'coach-kid.jpeg',
-    imgPos: '50% 16%',
+    photo: 'loc-play.jpg',
     bookHref: 'https://play-freerun-academy.trainin.app/',
     openingstijden: [
       { dag: 'Dinsdag', tijd: '17:00 - 20:00' },
@@ -330,7 +329,8 @@ export const locations: Location[] = [
     address: null,
     intro:
       'Silver Academy in de Krimpenerwaard biedt zowel binnen- als buitenlessen, verspreid over verschillende locaties in de regio. Daardoor trainen we het hele jaar door. Voor jong en oud, van beginner tot gevorderd, een levendige community waar plezier, groei en samen trainen centraal staan.',
-    photo: 'rooftop-silhouette.jpeg',
+    photo: 'loc-silver.jpg',
+    imgPos: '50% 38%',
     bookHref: '/contact/',
     openingstijden: [],
     abonnementen: [
@@ -363,8 +363,8 @@ export const locations: Location[] = [
     address: { street: 'Ridderstraat 23', postcode: '6511 TM', city: 'Nijmegen' },
     intro:
       'Locatie Nijmegen is onze nieuwste outdoor trainingslocatie, in de bruisende stad aan de Waal. Onder begeleiding van ervaren coaches train je binnen in een gymzaal of buiten op uitdagende obstakels. Voor elk niveau een uitdaging, of je nu net begint of al jaren traint.',
-    photo: 'sequence-bridge.jpg',
-    imgPos: '50% 26%',
+    photo: 'loc-nijmegen.jpg',
+    imgPos: '50% 52%',
     bookHref: '/contact/',
     openingstijden: [
       { dag: 'Weekdagen', tijd: '09:00 - 21:00' },

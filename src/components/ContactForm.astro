@@ -63,6 +63,9 @@ const {
   .cform__note { color: var(--on-dark-faint); font-size: 0.82rem; }
   .cform__note.is-error { color: #ff9a91; }
   .cform__note.is-ok { color: #8ee06a; }
+  .cform__choice { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; color: var(--on-dark-soft) !important; }
+  .cform__opt { font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.72rem; color: var(--red); border: 1px solid var(--red); border-radius: 100px; padding: 0.28rem 0.75rem; transition: all 0.15s; }
+  .cform__opt:hover { background: var(--red); color: #fff; }
   @media (min-width: 620px) { .cform__row { grid-template-columns: 1fr 1fr; } }
 </style>
 
@@ -96,12 +99,26 @@ const {
           setStatus('Er ging iets mis. Mail ons direct via ' + mailto + '.', 'is-error');
         }
       } else {
-        // Fallback zonder backend: open de mailclient met ingevulde gegevens.
-        const body =
-          `Naam: ${data.naam}\nE-mail: ${data.email}\nTelefoon: ${data.telefoon || '-'}\n\n${data.bericht}`;
-        const href = `mailto:${mailto}?subject=${encodeURIComponent('[' + (data.onderwerp || 'Contact') + '] ' + data.naam)}&body=${encodeURIComponent(body)}`;
-        window.location.href = href;
-        setStatus('Je mailprogramma opent met je bericht. Versturen maar!', 'is-ok');
+        // Geen backend: laat de bezoeker kiezen hoe te versturen (Gmail in de browser of de mailapp).
+        const subject = '[' + (data.onderwerp || 'Contact') + '] ' + (data.naam || '');
+        const body = `Naam: ${data.naam || ''}\nE-mail: ${data.email || ''}\nTelefoon: ${data.telefoon || '-'}\n\n${data.bericht || ''}`;
+        const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(mailto)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const mailtoUrl = `mailto:${mailto}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        if (status) {
+          status.className = 'cform__note cform__choice is-ok';
+          status.innerHTML =
+            '<span>Versturen via:</span>' +
+            `<a href="${gmail}" target="_blank" rel="noopener" class="cform__opt">Gmail</a>` +
+            `<a href="${mailtoUrl}" class="cform__opt">mailapp</a>` +
+            '<button type="button" class="cform__opt" data-copy>kopieer bericht</button>';
+          const copyBtn = status.querySelector<HTMLButtonElement>('[data-copy]');
+          copyBtn?.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(`Aan: ${mailto}\nOnderwerp: ${subject}\n\n${body}`);
+              copyBtn.textContent = 'gekopieerd!';
+            } catch {}
+          });
+        }
       }
     });
   });

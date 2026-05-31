@@ -52,6 +52,7 @@ export const NAV: NavItem[] = [
   { label: 'Kinderfeestjes', href: '/kinderfeestjes/' },
   { label: 'Zakelijk', href: '/zakelijk/' },
   { label: 'Over ons', href: '/over-ons/' },
+  { label: 'FAQ', href: '/faq/' },
   { label: 'Contact', href: '/contact/' },
 ];
 

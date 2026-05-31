@@ -24,7 +24,7 @@ export const MISSION_2 =
 export const STATS = [
   { value: '2006', label: 'Sinds' },
   { value: '6', label: 'Locaties' },
-  { value: '13+', label: 'Coaches' },
+  { value: '20+', label: 'Coaches' },
   { value: 'Alle', label: 'Leeftijden' },
 ] as const;
 

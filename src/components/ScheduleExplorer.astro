@@ -110,14 +110,15 @@ const total = entries.length;
   .daycol { background: var(--panel); border: 1px solid var(--line-dark); border-radius: var(--radius); padding: 0.9rem; }
   .daycol__h { font-size: 1.15rem; padding-bottom: 0.6rem; margin-bottom: 0.6rem; border-bottom: 2px solid var(--red); position: sticky; top: 5rem; background: var(--panel); }
   .daycol__list { display: flex; flex-direction: column; gap: 0.5rem; }
-  .cls { display: grid; gap: 0.15rem; padding: 0.7rem 0.8rem; background: var(--ink); border: 1px solid var(--line-dark); border-radius: 3px; border-left: 3px solid var(--c, var(--red)); }
-  .cls__time { font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.03em; }
+  .cls { display: grid; gap: 0.1rem; padding: 0.55rem 0.7rem; background: var(--ink); border: 1px solid var(--line-dark); border-radius: 3px; border-left: 3px solid var(--c, var(--red)); }
+  .cls__time { font-family: var(--font-display); font-size: 0.95rem; letter-spacing: 0.03em; }
   .cls__dash { color: var(--on-dark-faint); margin: 0 0.45em; font-family: var(--font-sans); font-weight: 600; }
   .cls__group { font-size: 0.86rem; color: var(--on-dark); display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
   .cls__new { font-style: normal; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; background: var(--red); color: #fff; padding: 0.1rem 0.35rem; border-radius: 2px; }
-  .cls__loc { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.72rem; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .cls__loc { display: inline-flex; align-items: center; gap: 0.38rem; font-size: 0.62rem; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.02em; }
   .cls__loc b { color: var(--c); font-weight: 800; }
   .cls__loc em { color: var(--on-dark-faint); font-style: normal; font-weight: 600; }
+  .rooster.single-loc .cls__loc { display: none; }
   .cls__loc:hover b { filter: brightness(1.18); }
   .dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; flex: none; background: var(--c); }
   .daycol__empty, .rooster__none { color: var(--on-dark-faint); font-size: 0.85rem; padding: 0.5rem 0; }
@@ -160,6 +161,7 @@ const total = entries.length;
         if (empty) empty.hidden = !!hasVisible;
       });
       if (countEl) countEl.textContent = String(visible);
+      root.classList.toggle('single-loc', !!state.loc);
       const active = !!(state.loc || state.age || state.dag);
       if (resetBtn) resetBtn.hidden = !active;
       if (noneEl) noneEl.hidden = visible !== 0;

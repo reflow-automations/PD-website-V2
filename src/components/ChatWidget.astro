@@ -22,7 +22,7 @@ import { CHAT_WEBHOOK } from '../consts';
       <span class="chat__gear" aria-hidden="true"></span>
       <div class="chat__title">
         <strong>Vraag het PD</strong>
-        <span>We reageren direct, 24/7</span>
+        <span>Digitale assistent · reageert direct</span>
       </div>
       <button class="chat__close" data-chat-toggle type="button" aria-label="Sluit de chat">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path></svg>
@@ -32,7 +32,7 @@ import { CHAT_WEBHOOK } from '../consts';
     <div class="chat__log" data-chat-log aria-live="polite"></div>
 
     <form class="chat__form" data-chat-form>
-      <textarea data-chat-input rows="1" placeholder="Stel je vraag over lessen, locaties, prijzen..." aria-label="Jouw bericht"></textarea>
+      <textarea data-chat-input rows="1" placeholder="Stel je vraag…" aria-label="Jouw bericht"></textarea>
       <button type="submit" class="chat__send" aria-label="Verstuur">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" width="20" height="20"><path d="M4 12l16-7-7 16-2.5-6.5L4 12Z" fill="currentColor"></path></svg>
       </button>
@@ -74,7 +74,7 @@ import { CHAT_WEBHOOK } from '../consts';
   .chat__head { display: flex; align-items: center; gap: 0.7rem; padding: 0.9rem 1rem; background: var(--panel); border-bottom: 1px solid var(--line-dark); }
   .chat__gear { width: 2rem; height: 2rem; flex: none; background: var(--red); -webkit-mask: url('/brand/gear.png') center/contain no-repeat; mask: url('/brand/gear.png') center/contain no-repeat; }
   .chat__title { display: flex; flex-direction: column; line-height: 1.15; margin-right: auto; }
-  .chat__title strong { font-family: var(--font-display); text-transform: uppercase; font-size: 1.05rem; letter-spacing: 0.02em; }
+  .chat__title strong { font-family: var(--font-sans); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; }
   .chat__title span { font-size: 0.7rem; color: var(--on-dark-soft); }
   .chat__close { color: var(--on-dark-soft); display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 6px; }
   .chat__close:hover { color: #fff; background: rgba(255,255,255,0.06); }
@@ -84,8 +84,9 @@ import { CHAT_WEBHOOK } from '../consts';
 
   .chat__form { display: flex; align-items: flex-end; gap: 0.5rem; padding: 0.7rem; border-top: 1px solid var(--line-dark); background: var(--panel); }
   .chat__form textarea {
-    flex: 1; resize: none; max-height: 7rem; background: var(--ink); border: 1px solid var(--line-dark);
-    border-radius: 10px; padding: 0.6rem 0.75rem; color: #fff; font-size: 0.9rem; line-height: 1.4;
+    flex: 1; resize: none; min-height: 2.7rem; max-height: 7rem; overflow-y: hidden;
+    background: var(--ink); border: 1px solid var(--line-dark);
+    border-radius: 10px; padding: 0.65rem 0.75rem; color: #fff; font-size: 0.9rem; line-height: 1.35;
   }
   .chat__form textarea:focus { outline: none; border-color: var(--red); }
   .chat__send { flex: none; width: 2.6rem; height: 2.6rem; border-radius: 10px; background: var(--red); color: #fff; display: grid; place-items: center; transition: background 0.2s, transform 0.2s; }
@@ -127,13 +128,21 @@ import { CHAT_WEBHOOK } from '../consts';
     if (!panel || !log || !form || !input) return;
 
     const WELCOME =
-      'Hoi! 👋 Ik ben de assistent van Parkour Disciplines. Vraag me gerust naar lessen, lestijden, locaties, prijzen of een gratis proefles.';
+      'Hoi! 👋 Ik ben de digitale assistent van Parkour Disciplines. Vraag me gerust naar lessen, lestijden, locaties, prijzen of een gratis proefles.';
 
     // Session id (voor het geheugen in n8n) + zichtbare berichten (per tab).
-    let sessionId = localStorage.getItem('pd-chat-session');
+    // Bij een echte page-reload (F5) starten we een nieuwe sessie; bij gewone
+    // navigatie tussen pagina's blijft het gesprek staan (sessionStorage).
+    const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+    if (nav?.type === 'reload') {
+      sessionStorage.removeItem('pd-chat-session');
+      sessionStorage.removeItem('pd-chat-msgs');
+      sessionStorage.removeItem('pd-chat-open');
+    }
+    let sessionId = sessionStorage.getItem('pd-chat-session');
     if (!sessionId) {
       sessionId = 'web-' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-      localStorage.setItem('pd-chat-session', sessionId);
+      sessionStorage.setItem('pd-chat-session', sessionId);
     }
     type Msg = { role: 'bot' | 'user'; text: string };
     let msgs: Msg[] = [];
@@ -148,7 +157,8 @@ import { CHAT_WEBHOOK } from '../consts';
     // Maakt paden (/lesrooster), boekingslinks (x.trainin.app) en e-mails klikbaar.
     function linkify(raw: string) {
       const re = /(https?:\/\/[^\s<]+)|([a-z0-9-]+\.trainin\.app(?:\/[^\s<]*)?|(?:www\.)?freerunkleding\.nl(?:\/[^\s<]*)?)|(\/(?:lessen|lesrooster|locaties(?:\/#[a-z-]+)?|kinderfeestjes|zakelijk|over-ons|contact|faq))|([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi;
-      return escapeHtml(raw).replace(re, (m, url, dom, path, email) => {
+      const esc = escapeHtml(raw).replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      return esc.replace(re, (m, url, dom, path, email) => {
         const ext = (href: string, text: string) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
         if (url) { const t = url.replace(/[.,)]+$/, ''); return ext(t, t) + url.slice(t.length); }
         if (dom) { const t = dom.replace(/[.,)]+$/, ''); return ext('https://' + t, t) + dom.slice(t.length); }
@@ -184,6 +194,7 @@ import { CHAT_WEBHOOK } from '../consts';
     // Auto-grow textarea
     const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 112) + 'px'; };
     input.addEventListener('input', grow);
+    grow();
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
     });
